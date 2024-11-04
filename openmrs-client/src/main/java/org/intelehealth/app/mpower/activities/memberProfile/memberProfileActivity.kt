@@ -12,8 +12,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.viewpager.widget.ViewPager
 import com.google.gson.Gson
+import com.openmrs.android_sdk.library.models.OperationType
 import com.openmrs.android_sdk.library.models.Patient
+import com.openmrs.android_sdk.library.models.Result
 import com.openmrs.android_sdk.utilities.ApplicationConstants
+import com.openmrs.android_sdk.utilities.ToastUtil
 import dagger.hilt.android.AndroidEntryPoint
 import org.intelehealth.app.mpower.R
 import org.intelehealth.app.mpower.activities.ACBaseActivity
@@ -36,8 +39,12 @@ class MemberProfileActivity : ACBaseActivity(), View.OnClickListener {
 
         observeData()
         initViewPager()
-        mViewModel.populateProfileData()
-        mViewModel.populateServiceHistory()
+
+        if(mViewModel.patient.display != null && mViewModel.patient.display!!.isNotEmpty()){
+            mViewModel.fetchPatientFromDB(mViewModel.patient.uuid!!)
+        } else {
+            mViewModel.fetchProfileDetail(mViewModel.patient.person.uuid!!)
+        }
 
         supportActionBar?.let {
             it.elevation = 0f
@@ -63,11 +70,27 @@ class MemberProfileActivity : ACBaseActivity(), View.OnClickListener {
     }
 
     private fun observeData() {
+        mViewModel.result.observe(this, Observer { result ->
+            when (result) {
+                is Result.Loading -> {}
+                is Result.Success -> if (result.operationType == OperationType.FetchProfileDetail) {
+                    mViewModel.populateProfileData()
+                    mViewModel.populateServiceHistory()
+                }
+                is Result.Error -> if (result.operationType == OperationType.FetchProfileDetail) {
+                    throw IllegalStateException()
+                }
+                else -> throw IllegalStateException()
+            }
+        })
         mViewModel.rxReligion.observe(this, Observer {
             mBinding.tvMemberReligion.text = it
         })
         mViewModel.rxMaritalStatus.observe(this, Observer {
             mBinding.tvMemberMaritalStatus.text = it
+        })
+        mViewModel.rxBloodGroup.observe(this, Observer {
+            mBinding.tvMemberBloodGroup.text = it
         })
         mViewModel.rxBloodGroup.observe(this, Observer {
             mBinding.tvMemberBloodGroup.text = it

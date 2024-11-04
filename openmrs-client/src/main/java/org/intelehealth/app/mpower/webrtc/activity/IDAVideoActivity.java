@@ -107,7 +107,7 @@ public class IDAVideoActivity extends CoreVideoCallActivity implements SwipeButt
             binding.videoCallView.tvVideoCallDoctorName.setText(doctorName);
             binding.videoCallView.tvVideoCallPatientName.setText(args.getPatientName());
             binding.videoCallView.remoteUserTextIcon.setText(String.valueOf(args.getDoctorName().toUpperCase().toCharArray()[0]));
-            binding.videoCallView.localUserTextIcon.setText(String.valueOf(args.getNurseName().toUpperCase().toCharArray()[0]));
+//            binding.videoCallView.localUserTextIcon.setText(String.valueOf(args.getNurseName().toUpperCase().toCharArray()[0]));
         }
     }
 

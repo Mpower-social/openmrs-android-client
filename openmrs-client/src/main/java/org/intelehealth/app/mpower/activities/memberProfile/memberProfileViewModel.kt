@@ -1,30 +1,27 @@
 package org.intelehealth.app.mpower.activities.memberProfile
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.view.View
-import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.content.ContextCompat.startActivity
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import com.google.gson.Gson
 import com.openmrs.android_sdk.library.api.repository.ConceptRepository
 import com.openmrs.android_sdk.library.api.repository.EncounterRepository
 import com.openmrs.android_sdk.library.api.repository.PatientRepository
 import com.openmrs.android_sdk.library.dao.EncounterDAO
 import com.openmrs.android_sdk.library.dao.PatientDAO
-import com.openmrs.android_sdk.library.models.*
+import com.openmrs.android_sdk.library.models.ConceptAnswers
+import com.openmrs.android_sdk.library.models.Encounter
+import com.openmrs.android_sdk.library.models.EncounterType
+import com.openmrs.android_sdk.library.models.OperationType
+import com.openmrs.android_sdk.library.models.Patient
+import com.openmrs.android_sdk.library.models.Person
 import com.openmrs.android_sdk.utilities.ApplicationConstants
 import com.openmrs.android_sdk.utilities.DateUtils
 import com.openmrs.android_sdk.utilities.execute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.intelehealth.app.mpower.activities.BaseViewModel
-import org.intelehealth.app.mpower.activities.formdisplay.FormDisplayActivity
 import org.intelehealth.app.mpower.databinding.ActivityMemberProfileBinding
 import org.intelehealth.app.mpower.listeners.ItemClickListener
-import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import javax.inject.Inject
 
@@ -179,6 +176,42 @@ class MemberProfileViewModel @Inject constructor(
     }
 
     fun fetchEncounterType() = encounterDAO.getEncounterTypeByFormName(EncounterType.ADMISSION).uuid!!
+
+    fun fetchProfileDetail(uuid: String) {
+        addSubscription(patientRepository.findPatientDetails(uuid)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { person: Person ->
+                    patient.person = person
+                    val localPatient = patientDAO.findPatientByUUID(uuid)
+                    if(localPatient.id != null && localPatient.uuid != null){
+                        patient.display = patient.person.display
+                        patient.age = patient.person.age
+                        patient.birthdate = patient.person.birthdate
+                        patient.attributes = patient.person.attributes
+                        patient.gender = patient.person.gender
+                        patient.names = patient.person.names
+                        try {
+                            patientDAO.updatePatient(patient.id!!, patient)
+                        } catch (ex: Exception){
+                            Log.d("Profile detail", "fetchProfileDetail: ${ex.toString()}")
+                        }
+                        setContent(patient, OperationType.FetchProfileDetail)
+                    }
+                },
+                { setError(it, OperationType.FetchProfileDetail) }
+            )
+        )
+    }
+
+
+    fun fetchPatientFromDB(uuid: String) {
+        setLoading()
+        val localPatient = patientDAO.findPatientByUUID(uuid)
+        if(localPatient.uuid != null && localPatient.uuid!!.isNotEmpty() && localPatient.display != null && localPatient.display!!.isNotEmpty()){
+            setContent(localPatient, OperationType.FetchProfileDetail)
+        }
+    }
 
     fun populateServiceHistory() {
         addSubscription(encounterRepository.getAllEncounterResourcesByPatientUuid(patient.uuid!!)

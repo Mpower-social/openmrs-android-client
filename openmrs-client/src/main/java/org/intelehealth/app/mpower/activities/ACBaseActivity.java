@@ -37,10 +37,12 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -53,6 +55,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 import com.openmrs.android_sdk.library.OpenMRSLogger;
 import com.openmrs.android_sdk.library.OpenmrsAndroid;
 import com.openmrs.android_sdk.library.dao.LocationDAO;
@@ -89,11 +92,22 @@ import org.intelehealth.app.mpower.utilities.LanguageUtils;
 import org.intelehealth.app.mpower.utilities.ThemeUtils;
 import androidx.core.content.ContextCompat;
 
+import org.intelehealth.klivekit.call.utils.CallHandlerUtils;
+import org.intelehealth.klivekit.call.utils.CallMode;
+import org.intelehealth.klivekit.call.utils.IntentUtils;
+import org.intelehealth.klivekit.model.RtcArgs;
+import org.intelehealth.klivekit.socket.CallInfo;
+import org.intelehealth.klivekit.socket.SocketManager;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 @AndroidEntryPoint
-public abstract class ACBaseActivity extends AppCompatActivity {
+public abstract class ACBaseActivity extends AppCompatActivity implements SocketManager.MyCallBack{
     protected final OpenMRS mOpenMRS = OpenMRS.getInstance();
     protected final OpenMRSLogger mOpenMRSLogger = OpenmrsAndroid.getOpenMRSLogger();
     protected FragmentManager mFragmentManager;
+    private final SocketManager socketManager = SocketManager.getInstance();
     protected AuthorizationManager mAuthorizationManager;
     protected CustomFragmentDialog mCustomFragmentDialog;
     protected Snackbar mSnackbar;
@@ -118,6 +132,8 @@ public abstract class ACBaseActivity extends AppCompatActivity {
         setupTheme();
         setupLanguage();
 
+        socketManager.setCallback(this);
+
         mFragmentManager = getSupportFragmentManager();
         mAuthorizationManager = new AuthorizationManager();
         locationList = new ArrayList<>();
@@ -131,6 +147,42 @@ public abstract class ACBaseActivity extends AppCompatActivity {
         }
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(ApplicationConstants.BroadcastActions.AUTHENTICATION_CHECK_BROADCAST_ACTION);
+    }
+
+    @Override
+    public void onDataReceived(String event, String data) {
+        runOnUiThread(() -> {
+            if(event != SocketManager.EVENT_ALL_USER){
+//                Toast.makeText(this, event, Toast.LENGTH_SHORT).show();
+                if (event.equals(SocketManager.EVENT_CALL)) {
+                    /*JSONObject jsonArray = new JSONObject(data);
+                    JSONObject jsonObject = jsonArray.getJSONObject(String.valueOf(0));
+                    JSONObject nameValuePairs = jsonObject.getJSONObject("nameValuePairs");
+                    JSONObject callInfoJsonObject = nameValuePairs.getJSONObject("nurseId");
+                    String callInfoJsonOb = nameValuePairs.getString("nurseId");
+                    CallInfo callInfo = new Gson().fromJson(callInfoJsonOb, org.intelehealth.klivekit.socket.CallInfo.class);
+                    RtcArgs arg = convertToRtcArgs(callInfo);*/
+                    RtcArgs arg = convertToRtcArgs();
+                    arg.setCallMode(CallMode.INCOMING);
+                    this.startActivity(IntentUtils.INSTANCE.getCallActivityIntent(arg, this));
+//                    CallHandlerUtils.INSTANCE.operateIncomingCall(this, arg);
+                }
+            }
+            if(event == SocketManager.EVENT_CREATE_OR_JOIN_HW){}
+            if(event == SocketManager.EVENT_CALL_REJECT_BY_DR){}
+            if(event == SocketManager.EVENT_CALL_REJECT_BY_HW){}
+            if(event == SocketManager.EVENT_CALL_CANCEL_BY_DR){ }
+            if(event == SocketManager.EVENT_CALL_CANCEL_BY_HW){ }
+            if(event == SocketManager.EVENT_CALL_TIME_UP){}
+            if(event == SocketManager.EVENT_INCOMING_CALL){}
+            if(event == SocketManager.EVENT_CALL_CONNECTED){}
+            if(event == SocketManager.EVENT_BYE){}
+            if(event == SocketManager.EVENT_LEAVE){}
+        });
+    }
+
+    public RtcArgs convertToRtcArgs() {
+        return RtcArgs.Companion.dummy();
     }
 
     @Override

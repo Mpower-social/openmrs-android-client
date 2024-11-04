@@ -36,4 +36,24 @@ class PersonAttribute : Serializable {
     @Expose
     var value: String? = null
 
+    @SerializedName("uuid")
+    @Expose
+    var uuid: String? = null
+
+    @SerializedName("display")
+    @Expose
+    var display: String? = null
+
+}
+
+class PersonAttributeCustom : Serializable {
+
+    @SerializedName("attributeType")
+    @Expose
+    var attributeType: String? = null
+
+    @SerializedName("value")
+    @Expose
+    var value: String? = null
+
 }

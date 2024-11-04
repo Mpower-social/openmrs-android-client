@@ -32,7 +32,10 @@ enum class OperationType {
     LocationsFetching,
     FetchingSearchUser,
     FetchingCallToken,
-    EncounterListSearching
+    FetchingSID,
+    EncounterListSearching,
+    AddEditPatient,
+    FetchProfileDetail,
 }
 
 enum class ResultType {
@@ -61,5 +64,7 @@ enum class ResultType {
     LoginNoInternetConnection,
     LocationsFetchingLocalSuccess,
     LocationsFetchingSuccess,
-    LocationsFetchingNoInternetConnection
+    LocationsFetchingNoInternetConnection,
+    AddEditPatientSuccess,
+    AddEditPatientError
 }

@@ -7,6 +7,7 @@ import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.IntentCompat
@@ -252,7 +253,7 @@ abstract class CoreVideoCallActivity : AppCompatActivity() {
 //        socketViewModel.eventBye.observe(this) { if (it) sayBye() }
         lifecycleScope.launch {
             delay(1000)
-            Timber.e { "Socket connected =>${socketViewModel.isConnected()}" }
+            Log.d("CoreVideoCallActivity", "Socket connected =>${socketViewModel.isConnected()}")
         }
     }
 

@@ -50,7 +50,6 @@ class ReferedMembersViewModel @Inject constructor(private val patientDAO: Patien
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { patients: List<ReferredPatient> ->
-                        print("done")
 //                        insertServerMembers(patients)
 //                        setContent(patients)
                     },

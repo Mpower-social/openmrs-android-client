@@ -1670,7 +1670,8 @@
                                 android:layout_marginTop="20dp"
                                 android:background="@drawable/admission_spinner"
                                 app:layout_constraintLeft_toLeftOf="parent"
-                                app:layout_constraintRight_toRightOf="parent"/>
+                                app:layout_constraintRight_toRightOf="parent"
+                                android:visibility="gone"/>
 
                         </LinearLayout>
 
@@ -1687,6 +1688,25 @@
                                 android:layout_height="wrap_content"
                                 android:focusable="true"
                                 android:hint="@string/reg_nid"
+                                android:imeOptions="actionNext"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:textSize="14sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilBirthRegistrationNumber"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp">
+
+                            <EditText
+                                android:id="@+id/etBirthRegNumber"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="true"
+                                android:hint="@string/birth_reg_number"
                                 android:imeOptions="actionNext"
                                 android:inputType="number"
                                 android:maxLines="1"
@@ -1892,6 +1912,7 @@
                                 android:background="@drawable/admission_spinner"
                                 app:layout_constraintLeft_toLeftOf="parent"
                                 app:layout_constraintRight_toRightOf="parent"
+                                android:visibility="gone"
                                 app:layout_constraintTop_toBottomOf="@id/spinnerWard" />
 
                             <com.google.android.material.textfield.TextInputLayout

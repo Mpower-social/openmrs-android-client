@@ -27,3 +27,11 @@ class IdGenPatientIdentifiers {
 
 }
 
+class CustomIdGenPatientIdentifiers {
+
+    @SerializedName("identifier")
+    @Expose
+    var identifier: String = ""
+
+}
+

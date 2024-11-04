@@ -43,7 +43,7 @@ class MemberListViewModel @Inject constructor(private val patientDAO: PatientDAO
     }
 
     fun fetchMembersOnRefresh(query: String) {
-        if (NetworkUtils.isOnline()) {
+        /*if (NetworkUtils.isOnline()) {
             setLoading()
             addSubscription(patientRepository.findPatients(query)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -55,7 +55,7 @@ class MemberListViewModel @Inject constructor(private val patientDAO: PatientDAO
                     { setError(it, OperationType.MemberFetching) }
                 )
             )
-        }
+        }*/
     }
 
     fun insertServerMembers(patients: List<Patient>) {

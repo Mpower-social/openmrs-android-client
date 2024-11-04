@@ -1,8 +1,7 @@
 package org.intelehealth.klivekit.socket
 
-import android.app.ActivityManager
-import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.lifecycle.lifecycleScope
+import android.util.Log
+import android.widget.Toast
 import com.github.ajalt.timberkt.Timber
 import com.google.gson.Gson
 import io.socket.client.IO
@@ -11,13 +10,17 @@ import io.socket.client.Socket.EVENT_CONNECT
 import io.socket.client.Socket.EVENT_DISCONNECT
 import io.socket.client.SocketIOException
 import io.socket.emitter.Emitter
+import org.intelehealth.klivekit.call.utils.CallHandlerUtils
+import org.intelehealth.klivekit.call.utils.CallMode
 import org.intelehealth.klivekit.call.utils.CallNotificationHandler
+import org.intelehealth.klivekit.call.utils.IntentUtils
 import org.intelehealth.klivekit.model.ActiveUser
 import org.intelehealth.klivekit.model.ChatMessage
+import org.intelehealth.klivekit.utils.getApplicationName
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
-import kotlin.system.exitProcess
+
 
 /**
  * Created by Vaghela Mithun R. on 08-06-2023 - 18:47.
@@ -26,6 +29,16 @@ import kotlin.system.exitProcess
  **/
 open class SocketManager @Inject constructor() {
     var socket: Socket? = null
+
+    interface MyCallBack {
+        fun onDataReceived(event: String, data: String)
+    }
+
+    private var myCallback: MyCallBack? = null
+    fun setCallback(callback: MyCallBack) {
+        this.myCallback = callback
+    }
+
     private var emitterListeners: MutableList<((event: String) -> Emitter.Listener)> = arrayListOf()
     var emitterListener: ((event: String) -> Emitter.Listener)? = null
         set(value) {
@@ -48,11 +61,12 @@ open class SocketManager @Inject constructor() {
     }
 
     fun connect(url: String?) {
-        Timber.d { "Connect => $url" }
+        Log.d("SocketManager", "Socket Connect => $url")
         if (isConnected()) return
         try {
             url?.let {
-                socket = IO.socket(url)
+                val options = IO.Options()
+                socket = IO.socket(url, options)
                 socket?.on(EVENT_CONNECT, emitter(EVENT_CONNECT))
                 socket?.on(EVENT_DISCONNECT, emitter(EVENT_DISCONNECT))
                 socket?.on(EVENT_IS_READ, emitter(EVENT_IS_READ))
@@ -74,20 +88,37 @@ open class SocketManager @Inject constructor() {
                 socket?.on(EVENT_CALL_CANCEL_BY_DR, emitter(EVENT_CALL_CANCEL_BY_DR))
                 socket?.on(EVENT_MSG_DELIVERED, emitter(EVENT_MSG_DELIVERED))
                 socket?.on(EVENT_CALL_TIME_UP, emitter(EVENT_CALL_TIME_UP))
-                socket?.connect() ?: Timber.e { "Socket is null" }
-            } ?: Timber.e { "Socket url must not be empty" }
+                if(socket?.connect()?.connected()!!){
+                    Log.d("SocketManager", "Socket connected")
+                } else {
+                    Log.d("SocketManager", "Socket is null")
+                }
+            } ?: Log.d("SocketManager", "Socket url must not be empty")
         } catch (e: SocketIOException) {
-            Timber.e { "Invalid Socket url" }
+            Log.d("SocketManager", "Invalid Socket url")
         }
     }
 
     private fun emitter(event: String) = Emitter.Listener {
+        val mm = event
+        Log.d("socket result", event)
         val json: String? = Gson().toJson(it)
-        Timber.e { "$TAG => $event" }
+        myCallback?.onDataReceived(event, json!!)
         if (event == EVENT_CALL_TIME_UP) {
             isCallTimeUp = true
         }
+        if (event == EVENT_CONNECT) {
 
+        }
+        if (event == EVENT_CREATE_OR_JOIN_HW) {
+
+        }
+        if (event == EVENT_CALL_REJECT_BY_DR) {
+
+        }
+        if (event == EVENT_CALL) {
+
+        }
         if (event == EVENT_ALL_USER) {
             json?.let { array -> parseAndSaveToLocal(JSONArray(array)); }
         } else if (event == EVENT_UPDATE_MESSAGE) {
@@ -97,14 +128,14 @@ open class SocketManager @Inject constructor() {
                     notificationListener?.saveTheDoctor(message)
 //                    emitterListener?.invoke(event)?.call(it)
                     invokeListeners(event, it)
-                };
+                }
             }
         } else {
             if (isCallTimeUp && event == EVENT_CALL_CANCEL_BY_DR) return@Listener
             invokeListeners(event, it)
-//            emitterListener?.invoke(event)?.call(it)
+            emitterListener?.invoke(event)?.call(it)
         }
-//        if (event == EVENT_ALL_USER) Timber.e { "Online users ${Gson().toJson(it)}" }
+        if (event == EVENT_ALL_USER) Timber.d { "Online users ${Gson().toJson(it)}" }
     }
 
     private fun invokeListeners(event: String, args: Any?) {
@@ -251,7 +282,9 @@ open class SocketManager @Inject constructor() {
 
         @JvmStatic
         var instance = socketManager ?: synchronized(this) {
-            socketManager ?: SocketManager()
+            socketManager ?: SocketManager().also { socketManager = it }
+
+//            socketManager ?: SocketManager()
         }
 
         const val EVENT_IP_ADDRESS = "ipaddr"
@@ -273,6 +306,10 @@ open class SocketManager @Inject constructor() {
         const val EVENT_CALL_CANCEL_BY_HW = "cancel_hw"
         const val EVENT_CALL_CANCEL_BY_DR = "cancel_dr"
         const val EVENT_CALL_TIME_UP = "call_time_up"
+        const val EVENT_CONNECTION_SUCCESS = "connection_success"
+        const val EVENT_INCOMING_CALL = "incoming_call"
+        const val EVENT_CALL_CONNECTED = "call-connected"
+        const val EVENT_LEAVE = "leave"
 
         // Local event
         const val EVENT_CALL_HANG_UP = "call_hang_up"
@@ -297,3 +334,18 @@ open class SocketManager @Inject constructor() {
         const val EVENT_CHAT_READ = "chat_read"
     }
 }
+
+data class CallInfo (
+    val nurseID: String,
+    val doctorName: String,
+    val roomID: String,
+    val deviceToken: String,
+    val initiator: String,
+    val id: String,
+    val type: String,
+    val timestamp: String,
+    val visitID: String,
+    val doctorID: String,
+    val appToken: String,
+    val socketID: String
+)

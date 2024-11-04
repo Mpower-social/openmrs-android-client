@@ -1,14 +1,15 @@
 package org.intelehealth.app.mpower.activities.addeditpatient
 
+//import com.google.android.libraries.places.api.net.PlacesClient
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-//import com.google.android.libraries.places.api.net.PlacesClient
 import com.openmrs.android_sdk.library.api.repository.ConceptRepository
 import com.openmrs.android_sdk.library.api.repository.LocationRepository
 import com.openmrs.android_sdk.library.api.repository.PatientRepository
 import com.openmrs.android_sdk.library.dao.PatientDAO
 import com.openmrs.android_sdk.library.models.*
+import com.openmrs.android_sdk.library.models.OperationType.AddEditPatient
 import com.openmrs.android_sdk.library.models.OperationType.FetchingSearchUser
 import com.openmrs.android_sdk.library.models.OperationType.PatientRegistering
 import com.openmrs.android_sdk.utilities.ApplicationConstants
@@ -16,10 +17,11 @@ import com.openmrs.android_sdk.utilities.ApplicationConstants.BundleKeys.COUNTRI
 import com.openmrs.android_sdk.utilities.ApplicationConstants.BundleKeys.PATIENT_ID_BUNDLE
 import com.openmrs.android_sdk.utilities.PatientValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import org.joda.time.DateTime
 import org.intelehealth.app.mpower.activities.BaseViewModel
+import org.joda.time.DateTime
 import rx.android.schedulers.AndroidSchedulers
 import java.io.File
+import java.util.UUID
 import javax.inject.Inject
 
 
@@ -81,7 +83,7 @@ class AddEditPatientViewModel @Inject constructor(
     val mIdentifierList: List<String> = arrayListOf("NID", "HID", "BRID")
     var selectedIdentifier = ""
 
-    val mIdentifierTypeList: List<String> = arrayListOf("NID", "BRN", "কোনটা না")
+    val mIdentifierTypeList: List<String> = arrayListOf("NID", "BRN", "HID", "কোনটা না")
     var selectedIdentifierType = ""
 
     var rxSelectedDivision: MutableLiveData<LocationData> = MutableLiveData()
@@ -91,6 +93,8 @@ class AddEditPatientViewModel @Inject constructor(
     var rxSelectedUnion: MutableLiveData<LocationData> = MutableLiveData()
     var rxSelectedWard: MutableLiveData<LocationData> = MutableLiveData()
     var rxSelectedBlock: MutableLiveData<LocationData> = MutableLiveData()
+
+    var patientCreateModel: PatientCreate = PatientCreate()
 
     var patientValidator: PatientValidator
 
@@ -112,6 +116,8 @@ class AddEditPatientViewModel @Inject constructor(
     var dateHolder: DateTime? = null
     var identifierDateHolder: DateTime? = null
     var capturedPhotoFile: File? = null
+
+    var customAttrList : MutableList<PersonAttributeCustom> = mutableListOf()
 
     init {
         // Initialize patient state
@@ -139,10 +145,9 @@ class AddEditPatientViewModel @Inject constructor(
     }
 
     fun confirmPatient() {
-        val aa = patientValidator.validate()
-        if (!patientValidator.validate()) return
-        /*if (isUpdatePatient) updatePatient()
-        else registerPatient()*/
+        if(patient.gender.isNullOrBlank()) return
+        if(patient.birthdate.isNullOrBlank()) return
+        if (isUpdatePatient) updatePatient() else registerPatient()
     }
 
     fun fetchSimilarPatients() {
@@ -161,25 +166,12 @@ class AddEditPatientViewModel @Inject constructor(
     fun onSearch(searchBody: SearchRequest) {
         setLoading()
         addSubscription(
-            locationRepository.getUserBySearchIdentifier(searchBody)
-//            patientRepository.getUserBySearchIdentifier(searchBody)
+            patientRepository.getUserBySearchIdentifier(searchBody)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { _mSearchUser.value = it },
                 { setError(it, FetchingSearchUser) }
             )
-        )
-    }
-
-    fun onSignUp(patientCreateBody: PatientCreate) {
-        setLoading()
-        addSubscription(
-            locationRepository.postPatientCreate(patientCreateBody)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    { _mSearchUser.value = it },
-                    { setError(it, FetchingSearchUser) }
-                )
         )
     }
 
@@ -295,8 +287,19 @@ class AddEditPatientViewModel @Inject constructor(
     }
 
     private fun registerPatient() {
-        setLoading()
-        addSubscription(patientRepository.registerPatient(patient)
+        setLoading(operationType = PatientRegistering)
+        val cp = patient.person.toCustomPerson().apply {
+            this.attributes = customAttrList
+            if(this.addresses.isEmpty()){
+                this.addresses.add(PersonAddress())
+            }
+            this.uuid = UUID.randomUUID().toString()
+        }
+        val pcm = patient.toPatientCreateModel().apply {
+            this.person = cp
+            this.uuid = cp.uuid
+        }
+        addSubscription(patientRepository.registerPatient(patient, pcm)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { setContent(it, PatientRegistering) },
@@ -304,6 +307,24 @@ class AddEditPatientViewModel @Inject constructor(
                 )
         )
     }
+
+    private fun Person.toCustomPerson(): CustomPerson {
+        return CustomPerson().apply {
+            names = this@toCustomPerson.names
+            gender = this@toCustomPerson.gender
+            uuid = this@toCustomPerson.uuid
+            birthdate = this@toCustomPerson.birthdate
+            addresses = this@toCustomPerson.addresses
+            birthdateEstimated = this@toCustomPerson.birthdateEstimated
+        }
+    }
+
+    private fun Patient.toPatientCreateModel(): PatientCreateDTO {
+        return PatientCreateDTO().apply {
+            uuid = this@toPatientCreateModel.uuid
+        }
+    }
+
 
     private fun updatePatient() {
         setLoading()

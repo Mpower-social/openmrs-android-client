@@ -88,16 +88,4 @@ class LocationRepository @Inject constructor() : BaseRepository() {
             }
         })
     }
-
-    fun postPatientCreate(patientCreate: PatientCreate): Observable<SearchUser> {
-        return createObservableIO(Callable {
-            restApi.createPatient(patientCreate).execute().run {
-                if (isSuccessful && body() != null) {
-                    return@Callable body()!!.searchUser!!
-                } else {
-                    throw Exception(errorBody().toString())
-                }
-            }
-        })
-    }
 }

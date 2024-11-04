@@ -36,6 +36,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="5dp"
             android:textColor="?android:attr/textColorPrimary"
             android:fontFamily="@font/roboto_medium"
@@ -53,14 +54,16 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:textSize="14sp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
             app:layout_constraintEnd_toStartOf="@+id/iv_call_btn"
             app:layout_constraintTop_toBottomOf="@id/tv_caller_name"
             app:layout_constraintStart_toStartOf="parent"/>
 
         <ImageView
             android:id="@+id/iv_call_btn"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_margin="12dp"
             android:scaleType="fitXY"
             android:visibility="visible"

@@ -14,6 +14,7 @@
 
 package com.openmrs.android_sdk.library.api.repository;
 
+import static android.content.ContentValues.TAG;
 import static com.openmrs.android_sdk.library.databases.AppDatabaseHelper.createObservableIO;
 import static com.openmrs.android_sdk.utilities.ApplicationConstants.PRIMARY_KEY_ID;
 
@@ -22,15 +23,24 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Constraints;
@@ -38,6 +48,8 @@ import androidx.work.Data;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.openmrs.android_sdk.library.OpenmrsAndroid;
 import com.openmrs.android_sdk.library.api.RestApi;
 import com.openmrs.android_sdk.library.api.RestServiceBuilder;
@@ -46,15 +58,21 @@ import com.openmrs.android_sdk.library.dao.EncounterCreateRoomDAO;
 import com.openmrs.android_sdk.library.dao.PatientDAO;
 import com.openmrs.android_sdk.library.databases.AppDatabaseHelper;
 import com.openmrs.android_sdk.library.models.CallTokenModel;
+import com.openmrs.android_sdk.library.models.CustomIdGenPatientIdentifiers;
+import com.openmrs.android_sdk.library.models.CustomPatientIdentifier;
 import com.openmrs.android_sdk.library.models.Encountercreate;
 import com.openmrs.android_sdk.library.models.IdGenPatientIdentifiers;
 import com.openmrs.android_sdk.library.models.IdentifierType;
 import com.openmrs.android_sdk.library.models.Module;
 import com.openmrs.android_sdk.library.models.Patient;
+import com.openmrs.android_sdk.library.models.PatientCreateDTO;
 import com.openmrs.android_sdk.library.models.PatientDto;
 import com.openmrs.android_sdk.library.models.PatientDtoUpdate;
 import com.openmrs.android_sdk.library.models.PatientIdentifier;
 import com.openmrs.android_sdk.library.models.PatientPhoto;
+import com.openmrs.android_sdk.library.models.PatientSaveDTO;
+import com.openmrs.android_sdk.library.models.Person;
+import com.openmrs.android_sdk.library.models.PersonAttribute;
 import com.openmrs.android_sdk.library.models.RTCToken;
 import com.openmrs.android_sdk.library.models.ReferredPatient;
 import com.openmrs.android_sdk.library.models.ReferredPatientResponse;
@@ -130,6 +148,218 @@ public class PatientRepository extends BaseRepository {
         });
     }
 
+    /*public Observable<Patient> syncPatient(final Patient patient, final PatientCreateDTO patientCreateDTO) {
+        return createObservableIO(() -> {
+            final List<CustomPatientIdentifier> identifiers = new ArrayList<>();
+            final CustomPatientIdentifier identifier = new CustomPatientIdentifier();
+
+            String location = Objects.requireNonNull(locationRepository.getLocation()).getUuid();
+            identifier.setLocation(location);
+
+            String mIdentifier = getCustomPatientIdentifier();
+            identifier.setIdentifier(mIdentifier);
+
+            String mIdentifierType = getPatientIdentifierType().getUuid();
+            identifier.setIdentifierType(mIdentifierType);
+
+            identifiers.add(identifier);
+
+            patientCreateDTO.setIdentifiers(identifiers);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String mjson = gson.toJson(patientCreateDTO);
+
+            Response<PatientDto> response = restApi.createPatientDTO(patientCreateDTO).execute();
+            if (response.isSuccessful()) {
+                PatientDto returnedPatientDto = response.body();
+                if (returnedPatientDto != null) {
+                    patient.setUuid(returnedPatientDto.getUuid());
+                    patient.getPerson().setAttributes(returnedPatientDto.getPerson().getAttributes());
+                    patient.setIdentifiers(returnedPatientDto.getIdentifiers());
+//                    patientDAO.updatePatient(patient.getId(), patient);
+
+                    if (!patient.getEncounters().isEmpty()) {
+                        addEncounters(patient);
+                    }
+
+                    Gson gsons = new GsonBuilder().setPrettyPrinting().create();
+                    String mjsons = gsons.toJson(returnedPatientDto);
+                    PatientSaveDTO psDTO = toSavePatientDTO(returnedPatientDto);
+                    savePatient(psDTO).single().toBlocking().first();
+                }
+            } else {
+                throw new Exception("syncPatient error: " + response.message());
+            }
+            return patient;
+        });
+    }*/
+
+    public Observable<PatientDto> syncPatient(final Patient patient, final PatientCreateDTO patientCreateDTO) {
+        return createObservableIO(() -> {
+            final List<CustomPatientIdentifier> identifiers = new ArrayList<>();
+            final CustomPatientIdentifier identifier = new CustomPatientIdentifier();
+
+            String location = Objects.requireNonNull(locationRepository.getLocation()).getUuid();
+            identifier.setLocation(location);
+
+            String mIdentifier = getCustomPatientIdentifier();
+            identifier.setIdentifier(mIdentifier);
+
+            String mIdentifierType = getPatientIdentifierType().getUuid();
+            identifier.setIdentifierType(mIdentifierType);
+
+            identifiers.add(identifier);
+
+            patientCreateDTO.setIdentifiers(identifiers);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String mjson = gson.toJson(patientCreateDTO);
+
+            Response<PatientDto> response = restApi.createPatientDTO(patientCreateDTO).execute();
+            if (response.isSuccessful()) {
+                PatientDto returnedPatientDto = response.body();
+                patient.setUuid(returnedPatientDto.getUuid());
+                patient.getPerson().setAttributes(returnedPatientDto.getPerson().getAttributes());
+                patient.setIdentifiers(returnedPatientDto.getIdentifiers());
+                patientDAO.updatePatient(patient.getId(), patient);
+
+//                if (!patient.getEncounters().isEmpty()) {
+//                    addEncounters(patient);
+//                }
+
+                return returnedPatientDto;
+            } else {
+                throw new Exception("syncPatient error: " + response.message());
+            }
+        });
+    }
+
+    public Observable<ResponseBody> savePatient(final PatientSaveDTO psDTO) {
+        return createObservableIO(() -> {
+            try{
+                Response<ResponseBody> response = restApi.savePatientDTO(psDTO).execute();
+                if (response.isSuccessful()) {
+                    String aa = response.body().toString();
+                    return response.body();
+                } else {
+                    throw new Exception("syncPatient error: " + response.message());
+                }
+            } catch (Exception ex) {
+                throw new Exception("syncPatient error: " + ex.toString());
+            }
+        });
+    }
+
+    public PatientSaveDTO toSavePatientDTO(PatientDto rpDTO) {
+        PatientSaveDTO psDTO = new PatientSaveDTO();
+        psDTO.setUuid(rpDTO.getUuid());
+        psDTO.setDisplay(Objects.requireNonNull(rpDTO.getPerson()).getDisplay());
+        psDTO.setGender(rpDTO.getPerson().getGender());
+        psDTO.setAge(rpDTO.getPerson().getAge());
+        psDTO.setBirthdate(rpDTO.getPerson().getBirthdate());
+        psDTO.setBirthdateEstimated(rpDTO.getPerson().getBirthdateEstimated());
+        psDTO.setCauseOfDeath(rpDTO.getPerson().getCauseOfDeath());
+        psDTO.setAttributes(rpDTO.getPerson().getAttributes());
+        psDTO.setPersonUUID(rpDTO.getPerson().getUuid());
+        psDTO.setIdentifier(parseAttributeValue(rpDTO.getIdentifiers().get(0).getDisplay(), "=").get(1));
+        if(rpDTO.getPerson().getNames().size() > 0){
+            psDTO.setFirstName(rpDTO.getPerson().getNames().get(0).getGivenName());
+            psDTO.setLastName(rpDTO.getPerson().getNames().get(0).getMiddleName() + rpDTO.getPerson().getNames().get(0).getFamilyName());
+        } else {
+            ArrayList<String> finalList = parseAttributeValue(rpDTO.getPerson().getDisplay(), " ");
+            psDTO.setFirstName(finalList.get(0));
+            psDTO.setLastName(finalList.get(1));
+        }
+        psDTO.setCountryID(0L);
+        psDTO.setLocation(0L);
+        psDTO.setBlockID(0L);
+        psDTO.setBirthdateEstimated(false);
+        psDTO.setDeathdateEstimated(false);
+        for (PersonAttribute pa : rpDTO.getPerson().getAttributes()) {
+            ArrayList<String> values = parseAttributeValue(pa.getDisplay(), "=");
+            String attrUUID = values.get(0).trim();
+            String value = values.get(1);
+//            String attrUUID = pa.getUuid();
+            if(attrUUID.equals(ApplicationConstants.PATIENTS_BIRTH_PLACE_KEY)){
+                psDTO.setBirthPlace(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_MOBILE_KEY)){
+                psDTO.setMobile(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_NID_KEY)){
+                psDTO.setNid(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_MOTHER_NAME_KEY)){
+                psDTO.setMotherName(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_FATHER_NAME_KEY)){
+                psDTO.setFatherName(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_MOTHER_NAME_BANGLA_KEY)){
+                psDTO.setMotherNameBangla(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_FATHER_NAME_BANGLA_KEY)){
+                psDTO.setFatherNameBangla(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_NATIONALITY_KEY)){
+                psDTO.setNationality(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_OCCUPATION_KEY)){
+                psDTO.setOccupation(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_RELIGION_KEY)){
+                psDTO.setRelegion(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_DIVISION_KEY)){
+                psDTO.setDivision(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_BLOOD_GROUP_KEY)){
+                psDTO.setBloodGroup(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_EDUCATION_KEY)){
+                psDTO.setEduQualification(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_MARITAL_STATUS_KEY)){
+                psDTO.setMatritalStatus(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_DISABILITY_TYPE_KEY)){
+                psDTO.setDisabilityType(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_ETHNICITY_KEY)){
+                psDTO.setEthnicity(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_FULL_NAME_BANGLA_KEY)){
+                psDTO.setFullNameBangla(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_SPOUSE_NAME_BANGLA_KEY)){
+                psDTO.setSpouseNameBangla(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_SPOUSE_NAME_ENGLISH_KEY)){
+                psDTO.setSpouseNameEnglish(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_DISTRICT_KEY)){
+                psDTO.setDistrict(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_UPAZILA_KEY)){
+                psDTO.setUpazila(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_PAURASAVA_KEY)){
+                psDTO.setPaurasava(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_UNION_KEY)){
+                psDTO.setUnionName(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_WARD_KEY)){
+                psDTO.setWard(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_ADDRESS_KEY)){
+                psDTO.setPatientAddress(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_UNION_ID_KEY)){
+                psDTO.setUnionID(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_DIVISION_ID_KEY)){
+                psDTO.setDivisionID(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_DISTRICT_ID_KEY)){
+                psDTO.setDistrictID(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_UPAZILA_ID_KEY)){
+                psDTO.setUpazilaID(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_PAURASAVA_ID_KEY)){
+                psDTO.setPaurasavaID(value);
+            } else if(attrUUID.equals(ApplicationConstants.PATIENTS_WARD_ID_KEY)){
+                psDTO.setWardID(value);
+            }
+        }
+        return psDTO;
+    }
+
+    ArrayList<String> parseAttributeValue(String givenValue, String indicator){
+        ArrayList<String> finalList = new ArrayList<>();
+        int charIndex = givenValue.indexOf(indicator);
+        if (charIndex != -1) {
+            String beforeChar = givenValue.substring(0, charIndex);
+            String afterChar = givenValue.substring(charIndex + 1).trim();
+            finalList.add(beforeChar);
+            finalList.add(afterChar);
+        } else {
+            Log.d("Parse attribute", "Character not found in string");
+        }
+        return finalList;
+    }
+
+
     private void uploadPatientPhoto(final Patient patient) {
         PatientPhoto patientPhoto = new PatientPhoto();
         patientPhoto.setPhoto(patient.getPhoto());
@@ -168,6 +398,41 @@ public class PatientRepository extends BaseRepository {
             if (NetworkUtils.isOnline()) syncPatient(patient).single().toBlocking().first();
             return patient;
         });
+    }
+
+    public Observable<Patient> registerPatient(final Patient patient, final PatientCreateDTO patientCreateDTO) {
+        return createObservableIO(() -> {
+            Long id = patientDAO.savePatient(patient).single().toBlocking().first();
+            patient.setId(id);
+            return patient;
+            /*if (NetworkUtils.isOnline()) {
+                syncPatient(patient, patientCreateDTO).single().toBlocking().first();
+            } else {
+                throw new IOException("Network is not available");
+            }
+            return patient;*/
+        })
+                .flatMap(savedPatient -> {
+                    if (NetworkUtils.isOnline()) {
+                        return syncPatient(savedPatient, patientCreateDTO);
+                    } else {
+                        return Observable.error(new IOException("Network is not available"));
+                    }
+                })
+                .flatMap(returnedPatientDto -> {
+                    try{
+                        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                        PatientSaveDTO psDTO = toSavePatientDTO(returnedPatientDto);
+                        String mjson = gson.toJson(psDTO);
+                        return savePatient(psDTO)
+                                .map(responseBody -> {
+                            patient.setUuid(returnedPatientDto.getUuid());
+                            return patient;
+                        });
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
     }
 
     /**
@@ -303,6 +568,7 @@ public class PatientRepository extends BaseRepository {
         IdGenPatientIdentifiers idList = null;
 
         RestApi patientIdentifierService = RestServiceBuilder.createServiceForPatientIdentifier(RestApi.class);
+
         Call<IdGenPatientIdentifiers> call = patientIdentifierService.getPatientIdentifiers(OpenmrsAndroid.getUsername(), OpenmrsAndroid.getPassword());
 
         Response<IdGenPatientIdentifiers> response = call.execute();
@@ -311,6 +577,26 @@ public class PatientRepository extends BaseRepository {
         }
 
         return idList.getIdentifiers().get(0);
+    }
+
+    /**
+     * Get custom patient identifier
+     *
+     * @return patient identifier type
+     */
+    public String getCustomPatientIdentifier() throws IOException {
+        String customIdentifier = null;
+
+        Map<String, Object> searchBody = new HashMap<>();
+        Call<CustomIdGenPatientIdentifiers> call = restApi.getPatientIdentifiersCustom("8549f706-7e85-4c1d-9424-217d50a2988b",  searchBody);
+
+        Response<CustomIdGenPatientIdentifiers> response = call.execute();
+        if (response.isSuccessful()) {
+            assert response.body() != null;
+            customIdentifier = response.body().getIdentifier();
+        }
+
+        return customIdentifier;
     }
 
     /**
@@ -367,12 +653,16 @@ public class PatientRepository extends BaseRepository {
      * @param query patient query string
      * @return observable list of patients with matching query
      */
-    public Observable<List<Patient>> findPatients(String query) {
+    public Observable<List<ReferredPatient>> findPatients(String query) {
         return createObservableIO(() -> {
-            Response<Results<Patient>> response = restApi.getPatients(query, ApplicationConstants.API.FULL).execute();
-            List<Patient> pList = response.body().getResults();
-            if (response.isSuccessful()) {
-                return response.body().getResults();
+            /*Response<Results<Patient>> response = restApi.getPatients(query, ApplicationConstants.API.FULL).execute();
+            List<Patient> pList = response.body().getResults();*/
+            TextBody requestBody = new TextBody(query);
+            Call<ResponseBody> call = restApi.getSyncedPatients(requestBody);
+            Response<ResponseBody> response = call.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                String rawJson = response.body().string();
+                return new Gson().fromJson(rawJson, ReferredPatientResponse.class).getPersons();
             } else {
                 throw new Exception("Error with finding patients: " + response.message());
             }
@@ -380,30 +670,28 @@ public class PatientRepository extends BaseRepository {
     }
 
 
-    /*public Observable<List<ReferredPatient>> findReferredPatients(String query) throws Exception {
-        try{
-            return AppDatabaseHelper.createObservableIO(() -> {
-                TextBody requestBody = new TextBody(query);
-                Response<ReferredPatientResponse> response = restApi.getReferredPatients(requestBody).execute();
-                if (response.isSuccessful()) {
-                    List<ReferredPatient> pList = response.body().getPersons();
-                    return pList;
-                } else {
-                    throw new Exception("Error with finding referred patients: " + response.message());
-                }
-            });
-        } catch (Exception e){
-            throw new Exception("Error with finding referred patients: " + e.getMessage());
-        }
-    }*/
+
+    public Observable<Person> findPatientDetails(String patientUUID) {
+        return createObservableIO(() -> {
+            Call<ResponseBody> call = restApi.findPatientByUUID(patientUUID);
+            Response<ResponseBody> response = call.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                String rawJson = response.body().string();
+                return new Gson().fromJson(rawJson, Person.class);
+            } else {
+                throw new Exception("Error fetching patient details: " + response.message());
+            }
+        });
+    }
 
     public Observable<List<ReferredPatient>> findReferredPatients(String query) {
         return createObservableIO(() -> {
             TextBody requestBody = new TextBody(query);
-            Call<ReferredPatientResponse> call = restApi.getReferredPatients(requestBody);
-            Response<ReferredPatientResponse> response = call.execute();
+            Call<ResponseBody> call = restApi.getReferredPatients(requestBody);
+            Response<ResponseBody> response = call.execute();
             if (response.isSuccessful() && response.body() != null) {
-                return response.body().getPersons();
+                String rawJson = response.body().string();
+                return new Gson().fromJson(rawJson, ReferredPatientResponse.class).getPersons();
             } else {
                 throw new Exception("Error with finding referred patients: " + response.message());
             }
@@ -509,3 +797,4 @@ public class PatientRepository extends BaseRepository {
         }
     }
 }
+

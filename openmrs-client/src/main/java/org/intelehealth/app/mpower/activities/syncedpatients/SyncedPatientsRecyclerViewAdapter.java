@@ -110,7 +110,7 @@ public class SyncedPatientsRecyclerViewAdapter extends RecyclerView.Adapter<Sync
                     patient.getIdentifier().getIdentifier());
             holder.mIdentifier.setText(patientIdentifier);
         }
-        if (null != patient.getName()) {
+        if (null != patient.getPerson().getDisplay()) {
             holder.mDisplayName.setText(patient.getPerson().getDisplay());
         }
         if (null != patient.getGender()) {
@@ -130,7 +130,7 @@ public class SyncedPatientsRecyclerViewAdapter extends RecyclerView.Adapter<Sync
             holder.mRowLayout.setCardBackgroundColor(mContext.getResources().getColor(R.color.deceased_red));
         }
         try {
-            holder.mBirthDate.setText(patient.getBirthdate());
+            holder.mBirthDate.setText(DateUtils.convertTime1(patient.getPerson().getBirthdate(), DateUtils.OPEN_MRS_REQUEST_PATIENT_FORMAT));
         } catch (Exception e) {
             holder.mBirthDate.setText("");
         }

@@ -265,6 +265,7 @@ object AppDatabaseHelper {
         val patient = Patient(patientEntity.id, patientEntity.encounters, null)
         patient.display = patientEntity.display
         patient.uuid = patientEntity.uuid
+        patient.id = patientEntity.id
         val patientIdentifier = PatientIdentifier()
         patientIdentifier.identifier = patientEntity.identifier
         if (!patientEntity.person.equals("")) {

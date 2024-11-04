@@ -55,4 +55,8 @@ open class PatientDto {
     fun setIdentifiers(identifiers: List<PatientIdentifier>) {
         this.identifiers = identifiers
     }
+
+    fun getIdentifiers() : List<PatientIdentifier> {
+        return identifiers
+    }
 }

@@ -50,7 +50,7 @@ class FCMNotificationReceiver : FcmBroadcastReceiver() {
                     Timber.tag(TAG).d("onMessageReceived: $arg")
                     if (isAppInForeground()) {
                         arg.callMode = CallMode.INCOMING
-                        CallHandlerUtils.saveIncomingCall(context, arg)
+//                        CallHandlerUtils.saveIncomingCall(context, arg)
                         context.startActivity(IntentUtils.getCallActivityIntent(arg, context))
                     } else {
                         CallHandlerUtils.operateIncomingCall(it, arg)

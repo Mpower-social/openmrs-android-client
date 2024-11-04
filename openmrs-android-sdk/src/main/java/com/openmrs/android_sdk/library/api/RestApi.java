@@ -37,6 +37,7 @@ import com.openmrs.android_sdk.library.models.AppointmentType;
 import com.openmrs.android_sdk.library.models.ConceptAnswers;
 import com.openmrs.android_sdk.library.models.ConceptApiResponse;
 import com.openmrs.android_sdk.library.models.ConceptMembers;
+import com.openmrs.android_sdk.library.models.CustomIdGenPatientIdentifiers;
 import com.openmrs.android_sdk.library.models.Drug;
 import com.openmrs.android_sdk.library.models.DrugCreate;
 import com.openmrs.android_sdk.library.models.Encounter;
@@ -53,9 +54,12 @@ import com.openmrs.android_sdk.library.models.OrderCreate;
 import com.openmrs.android_sdk.library.models.OrderGet;
 import com.openmrs.android_sdk.library.models.Patient;
 import com.openmrs.android_sdk.library.models.PatientCreate;
+import com.openmrs.android_sdk.library.models.PatientCreateDTO;
 import com.openmrs.android_sdk.library.models.PatientDto;
 import com.openmrs.android_sdk.library.models.PatientDtoUpdate;
 import com.openmrs.android_sdk.library.models.PatientPhoto;
+import com.openmrs.android_sdk.library.models.PatientSaveDTO;
+import com.openmrs.android_sdk.library.models.Person;
 import com.openmrs.android_sdk.library.models.ProgramCreate;
 import com.openmrs.android_sdk.library.models.ProgramGet;
 import com.openmrs.android_sdk.library.models.Provider;
@@ -145,6 +149,11 @@ public interface RestApi {
     Call<IdGenPatientIdentifiers> getPatientIdentifiers(@Query("username") String username,
                                                         @Query("password") String password);
 
+
+    @Headers({"Content-Type: application/json"})
+    @POST("idgen/identifiersource/{uuid}/identifier")
+    Call<CustomIdGenPatientIdentifiers> getPatientIdentifiersCustom(@Path("uuid") String uuid, @Body Map<String, Object> searchBody);
+
     /**
      * Gets patient by uuid.
      *
@@ -167,9 +176,8 @@ public interface RestApi {
                                 @Query("roomId") String roomId,
                                 @Query("nurseName") String nurseName);
 
-
-    @POST("")
-    Call<SearchUserResponse> createPatient(@Body PatientCreate patientCreate);
+    @GET
+    Call<Void> getSID(@Url String url);
 
     /**
      * Gets last viewed patients.
@@ -191,6 +199,19 @@ public interface RestApi {
     @POST("patient")
     Call<PatientDto> createPatient(@Body PatientDto patientDto);
 
+
+    @GET("person/{uuid}?v=full")
+    Call<ResponseBody> findPatientByUUID(@Path("uuid") String uuid);
+
+
+    @Headers({"Content-Type: application/json"})
+    @POST("patient")
+    Call<PatientDto> createPatientDTO(@Body PatientCreateDTO patientCreateDTO);
+
+    @Headers({"Content-Type: application/json"})
+    @POST("custom-person/save")
+    Call<ResponseBody> savePatientDTO(@Body PatientSaveDTO patientSaveDTO);
+
     /**
      * Gets patients.
      *
@@ -202,12 +223,16 @@ public interface RestApi {
     Call<Results<Patient>> getPatients(@Query("q") String searchQuery,
                                        @Query("v") String representation);
 
+
+    @POST("custom-person/search")
+    Call<ResponseBody> getSyncedPatients(@Body TextBody queryBody);
+
     /**
      * Gets referred patients.
      * @return the patients
      */
     @POST("custom-person/refered")
-    Call<ReferredPatientResponse> getReferredPatients(@Body TextBody queryBody);
+    Call<ResponseBody> getReferredPatients(@Body TextBody queryBody);
 
     /**
      * Gets patients.

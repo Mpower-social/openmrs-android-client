@@ -62,6 +62,7 @@
     <string name="reg_surname_hint">Family Name*</string>
     <string name="reg_mobile_no">Mobile No</string>
     <string name="reg_nid">NID*</string>
+    <string name="birth_reg_number">Birth Registration Number</string>
     <string name="reg_birth_place">Birth Place*</string>
     <string name="reg_nationality">Nationality</string>
     <string name="reg_occupation">Occupation</string>
@@ -89,6 +90,9 @@
     <string name="addr2_hint">Address Line 2</string>
     <string name="addr_invalid_error">Address cannot contain invalid characters</string>
     <string name="atleastone">Fill at least one address field</string>
+    <string name="empty_birth_place">Birth place missing</string>
+    <string name="empty_mother_name">Mothers name missing</string>
+    <string name="empty_nid">NID missing</string>
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="dob_hint">Date of Birth (dd/MM/yyyy)</string>

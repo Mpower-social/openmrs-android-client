@@ -51,7 +51,7 @@ class LastViewedPatientsViewModel @Inject constructor(
     }
 
     fun fetchPatients(query: String) {
-        setLoading(PatientSearching)
+        /*setLoading(PatientSearching)
         addSubscription(patientRepository.findPatients(query)
                 .map { patientList -> return@map patientDAO.excludeSavedPatients(patientList) }
                 .observeOn(AndroidSchedulers.mainThread())
@@ -59,7 +59,7 @@ class LastViewedPatientsViewModel @Inject constructor(
                         { patientList -> setContent(patientList, PatientSearching) },
                         { setError(it, PatientSearching) }
                 )
-        )
+        )*/
     }
 
     private fun updateStartIndex(links: List<Link>, limit: Int) {

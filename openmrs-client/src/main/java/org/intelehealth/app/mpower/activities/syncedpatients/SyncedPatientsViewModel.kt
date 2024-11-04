@@ -1,14 +1,17 @@
 package org.intelehealth.app.mpower.activities.syncedpatients
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.MutableLiveData
-import com.google.gson.Gson
 import com.openmrs.android_sdk.library.api.repository.PatientRepository
 import com.openmrs.android_sdk.library.dao.PatientDAO
 import com.openmrs.android_sdk.library.dao.VisitDAO
 import com.openmrs.android_sdk.library.models.OperationType
 import com.openmrs.android_sdk.library.models.Patient
+import com.openmrs.android_sdk.library.models.PatientIdentifier
+import com.openmrs.android_sdk.library.models.Person
+import com.openmrs.android_sdk.library.models.ReferredPatient
 import com.openmrs.android_sdk.utilities.NetworkUtils
 import com.openmrs.android_sdk.utilities.ToastUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +21,9 @@ import org.intelehealth.app.mpower.models.NavDrawerItem
 import org.intelehealth.app.mpower.resources.Constants
 import org.intelehealth.app.mpower.utilities.FilterUtil
 import rx.android.schedulers.AndroidSchedulers
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -69,9 +75,10 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
             addSubscription(patientRepository.findPatients(query)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    { patients: List<Patient> ->
-                        insertServerPatients(patients)
-                        setContent(patients)
+                    { mPatients: List<ReferredPatient> ->
+                        convertToPatient(mPatients).run {
+                            insertServerPatients(this)
+                        }
                     },
                     { setError(it, OperationType.PatientFetching) }
                 )
@@ -79,21 +86,68 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
         }
     }
 
-    fun insertServerPatients(patients: List<Patient>) {
-        for (patient in patients) {
-            if(patient.uuid != null){
-                val isSaved = patientDAO.isUserAlreadySaved(patient.uuid!!)
+    private fun insertServerPatients(patients: List<Patient>) {
+        val mPatients: MutableList<Patient> = mutableListOf()
+        for (sPatient in patients) {
+            if(sPatient.uuid != null && sPatient.uuid!!.isNotEmpty()){
+                val isSaved = patientDAO.isUserAlreadySaved(sPatient.uuid!!)
                 if(!isSaved){
-                    try {
-                        addSubscription(patientDAO.savePatient(patient)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe())
-                    } catch (e: Error){
-                        ToastUtil.error(e.toString())
-                    }
+                    patientRepository.findPatientDetails(sPatient.uuid)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                            { person: Person ->
+                                sPatient.person = person
+                                sPatient.display = person.display
+                                sPatient.age = person.age
+                                sPatient.birthdate = person.birthdate
+                                sPatient.attributes = person.attributes
+                                sPatient.gender = person.gender
+                                sPatient.names = person.names
+                                try {
+                                    patientDAO.savePatient(sPatient).single().toBlocking().first()
+                                } catch (e: Error){
+                                    ToastUtil.error(e.toString())
+                                }
+                            }, {
+                                setError(it, OperationType.FetchProfileDetail)
+                            }
+                        )
                 }
+                mPatients.add(sPatient)
             }
         }
+        setContent(patients)
+    }
+
+    private fun convertToPatient(rPatientList: List<ReferredPatient>) : List<Patient> {
+        val finalList : MutableList<Patient> = mutableListOf()
+        for (rPerson in rPatientList){
+            finalList.add(rPerson.fromReferredPatient())
+        }
+        return finalList
+    }
+
+    private fun ReferredPatient.fromReferredPatient(): Patient {
+        return Patient().apply {
+            this.uuid = personUuid
+            this.person.uuid = personUuid
+            this.person.gender = gender
+            this.person.birthdate = parseDateTime(this@fromReferredPatient.birthdate!!)
+            this.identifiers = mutableListOf(
+                PatientIdentifier().apply {
+                    identifier = this@fromReferredPatient.identifier
+                }
+            )
+            this.person.display = this@fromReferredPatient.run {
+                "${this.firstName ?: ""} ${this.lastName ?: ""}"
+            }
+        }
+    }
+
+    private fun parseDateTime(value: Long): String {
+        val date = Date(value)
+        val format = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+        return format.format(date)
     }
 
     fun deleteSyncedPatient(patient: Patient) {

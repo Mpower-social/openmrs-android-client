@@ -18,6 +18,12 @@ import javax.inject.Inject;
 import java.io.File;
 
 import dagger.hilt.android.HiltAndroidApp;
+import okhttp3.Dispatcher;
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Response;
+import rx.android.schedulers.AndroidSchedulers;
+
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
@@ -29,6 +35,9 @@ import androidx.work.Configuration;
 import com.github.ajalt.timberkt.Timber;
 import com.openmrs.android_sdk.library.OpenMRSLogger;
 import com.openmrs.android_sdk.library.OpenmrsAndroid;
+import com.openmrs.android_sdk.library.api.RestApi;
+import com.openmrs.android_sdk.library.models.OperationType;
+import com.openmrs.android_sdk.library.models.RTCToken;
 import com.openmrs.android_sdk.utilities.ApplicationConstants;
 
 import org.intelehealth.app.mpower.services.AuthenticateCheckService;
@@ -84,6 +93,12 @@ public class OpenMRS extends MultiDexApplication implements Configuration.Provid
         Intent intent = new Intent(this, AuthenticateCheckService.class);
         startService(intent);
 
+        /*Dispatcher dispatcher = new Dispatcher();
+        dispatcher.setMaxRequestsPerHost(1);
+        dispatcher.setMaxRequests(4);
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.dispatcher(dispatcher);*/
+
         initSocketConnection();
     }
 
@@ -116,12 +131,20 @@ public class OpenMRS extends MultiDexApplication implements Configuration.Provid
         DateTimeResource.build(this);
         Log.d(TAG, "initSocketConnection: ");
         String providerId = OpenmrsAndroid.getProviderId();
+//        String providerId = "82f18b44-6814-11e8-923f-e9a88dcb533f";
         String hwName = OpenmrsAndroid.getCHWName();
+//        String hwName = "Super%20User";
+//        String eio = "3";
+//        String transport = "polling";
+//        String tt = "PAjezAF";
         if (providerId != null && !providerId.isEmpty()) {
-            Manager.getInstance().setBaseUrl(ApplicationConstants.RTC_SERVER_URL);
-            String socketUrl = ApplicationConstants.RTC_SERVER_URL + "?userId="
+            Manager.getInstance().setBaseUrl(ApplicationConstants.SOCKET_URL_NEW);
+            String socketUrl = ApplicationConstants.SOCKET_URL_NEW + "?userId="
                     + providerId
                     + "&name=" + hwName;
+//                    + "&EIO=" + eio
+//                    + "&transport=" + transport;
+//                    + "&t=" + tt;
             if (!socketManager.isConnected()) socketManager.connect(socketUrl);
             initRtcConfig();
         }
@@ -130,9 +153,11 @@ public class OpenMRS extends MultiDexApplication implements Configuration.Provid
     private void initRtcConfig() {
         String providerId = OpenmrsAndroid.getProviderId();
         String hwName = OpenmrsAndroid.getCHWName();
+//        String providerId = "82f18b44-6814-11e8-923f-e9a88dcb533f";
+//        String hwName = "Super%20User";
         new RtcEngine.Builder()
                 .callUrl(ApplicationConstants.LIVE_KIT_URL)
-                .socketUrl(ApplicationConstants.SOCKET_URL + "?userId="
+                .socketUrl(ApplicationConstants.SOCKET_URL_NEW + "?userId="
                         + providerId
                         + "&name=" + hwName)
                 .callIntentClass(IDAVideoActivity.class)

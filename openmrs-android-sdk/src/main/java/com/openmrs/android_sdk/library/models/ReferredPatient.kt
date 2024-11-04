@@ -3,7 +3,7 @@ package com.openmrs.android_sdk.library.models
 import com.google.gson.annotations.SerializedName
 
 data class ReferredPatientResponse(
-    @SerializedName("persons") val persons: List<ReferredPatient>
+    @SerializedName("persons") val persons: ArrayList<ReferredPatient>
 )
 
 data class ReferredPatient (
@@ -12,7 +12,7 @@ data class ReferredPatient (
     @SerializedName("person"         ) var person         : Int?     = null,
     @SerializedName("personUuid"     ) var personUuid     : String?  = null,
     @SerializedName("gender"         ) var gender         : String?  = null,
-    @SerializedName("birthdate"      ) var birthdate      : Int?     = null,
+    @SerializedName("birthdate"      ) var birthdate      : Long?     = null,
     @SerializedName("firstName"      ) var firstName      : String?  = null,
     @SerializedName("lastName"       ) var lastName       : String?  = null,
     @SerializedName("identifier"     ) var identifier     : String?  = null,
