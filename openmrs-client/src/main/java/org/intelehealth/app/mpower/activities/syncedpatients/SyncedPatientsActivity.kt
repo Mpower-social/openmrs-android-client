@@ -38,6 +38,7 @@ import org.intelehealth.app.mpower.activities.memberList.MemberListActivity
 import org.intelehealth.app.mpower.activities.memberProfile.MemberProfileActivity
 import org.intelehealth.app.mpower.activities.providermanagerdashboard.ProviderManagerDashboardActivity
 import org.intelehealth.app.mpower.activities.referedMemberList.ReferedMembersActivity
+import org.intelehealth.app.mpower.activities.stockIn.StockInActivity
 import org.intelehealth.app.mpower.activities.videoCall.VideoCallsActivity
 import org.intelehealth.app.mpower.databinding.ActivityNewDashboardBinding
 
@@ -97,6 +98,8 @@ class SyncedPatientsActivity : ACBaseActivity(), View.OnClickListener {
         mViewModel.loadReferredMemberList.observe(this, Observer { gotoReferredMemberList() })
 
         mViewModel.loadVideoCalls.observe(this, Observer { gotoVideoCalls() })
+
+        mViewModel.loadStockIn.observe(this, Observer { gotoStockIn() })
 
     }
 
@@ -219,6 +222,12 @@ class SyncedPatientsActivity : ACBaseActivity(), View.OnClickListener {
     fun gotoVideoCalls() {
         openCloseDrawer()
         val intent = Intent(this, VideoCallsActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun gotoStockIn() {
+        openCloseDrawer()
+        val intent = Intent(this, StockInActivity::class.java)
         startActivity(intent)
     }
 

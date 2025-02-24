@@ -27,6 +27,9 @@
     <string name="drawer_find_member">Find member</string>
     <string name="drawer_referral_list">Referred member list</string>
     <string name="drawer_stock_management">Stock management</string>
+    <string name="drawer_stock_in">Stock In</string>
+    <string name="drawer_stock_list">Stock List</string>
+    <string name="drawer_stock_dashboard">Stock Dashboard</string>
     <string name="drawer_active_visits">Active visits</string>
     <string name="drawer_form_entry">Form entry</string>
     <string name="drawer_manage_providers">Manage providers</string>

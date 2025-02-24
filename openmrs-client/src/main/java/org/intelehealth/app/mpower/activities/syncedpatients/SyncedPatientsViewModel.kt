@@ -41,6 +41,9 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
     var loadReferredMemberList : MutableLiveData<Boolean> = MutableLiveData()
     var loadAddMember : MutableLiveData<Boolean> = MutableLiveData()
     var loadVideoCalls : MutableLiveData<Boolean> = MutableLiveData()
+    var loadStockIn : MutableLiveData<Boolean> = MutableLiveData()
+    var loadStockList : MutableLiveData<Boolean> = MutableLiveData()
+    var loadStockDashboard : MutableLiveData<Boolean> = MutableLiveData()
 
     fun loadDrawerItems(context: Context) {
         drawerItemListAdapter.updateModuleItems(NavDrawerItem.getNavDrawerItems(context))
@@ -224,6 +227,14 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
                 loadVideoCalls.value = loadVideoCalls.value != true
             }
         }
+        else if(navDrawer.id == Constants.ITEM_STOCK_IN) {
+            if(loadStockIn.value == null)
+                loadStockIn.value = true
+            else {
+                loadStockIn.value = loadStockIn.value != true
+            }
+        }
+
     }
 
 }
