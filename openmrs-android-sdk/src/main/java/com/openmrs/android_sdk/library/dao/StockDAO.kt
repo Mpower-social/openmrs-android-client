@@ -1,0 +1,41 @@
+/*
+ * The contents of this file are subject to the OpenMRS Public License
+ * Version 1.0 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://license.openmrs.org
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ */
+package com.openmrs.android_sdk.library.dao
+
+import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
+import com.openmrs.android_sdk.library.databases.entities.StockInModel
+import com.openmrs.android_sdk.library.databases.entities.VisitEntity
+import io.reactivex.Single
+
+/**
+ * The interface Visit room dao.
+ */
+@Dao
+interface StockDAO {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun addStock(task: StockInModel): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun addStock(products: List<StockInModel>): List<Long>
+
+    @Query("SELECT * FROM stock_table")
+    fun getAllStock(): List<StockInModel>
+
+    @RawQuery
+    fun searchStock(query: SupportSQLiteQuery): List<StockInModel>
+
+
+}

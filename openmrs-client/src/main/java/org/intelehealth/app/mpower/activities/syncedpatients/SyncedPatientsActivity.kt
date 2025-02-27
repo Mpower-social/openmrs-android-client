@@ -15,6 +15,7 @@ package org.intelehealth.app.mpower.activities.syncedpatients
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -35,10 +36,11 @@ import org.intelehealth.app.mpower.activities.addeditpatient.AddEditPatientActiv
 import org.intelehealth.app.mpower.activities.formentrypatientlist.FormEntryPatientListActivity
 import org.intelehealth.app.mpower.activities.lastviewedpatients.LastViewedPatientsActivity
 import org.intelehealth.app.mpower.activities.memberList.MemberListActivity
-import org.intelehealth.app.mpower.activities.memberProfile.MemberProfileActivity
 import org.intelehealth.app.mpower.activities.providermanagerdashboard.ProviderManagerDashboardActivity
 import org.intelehealth.app.mpower.activities.referedMemberList.ReferedMembersActivity
-import org.intelehealth.app.mpower.activities.stockIn.StockInActivity
+import org.intelehealth.app.mpower.activities.stockManagement.StockDashboardActivity
+import org.intelehealth.app.mpower.activities.stockManagement.StockInActivity
+import org.intelehealth.app.mpower.activities.stockManagement.StockListActivity
 import org.intelehealth.app.mpower.activities.videoCall.VideoCallsActivity
 import org.intelehealth.app.mpower.databinding.ActivityNewDashboardBinding
 
@@ -99,7 +101,15 @@ class SyncedPatientsActivity : ACBaseActivity(), View.OnClickListener {
 
         mViewModel.loadVideoCalls.observe(this, Observer { gotoVideoCalls() })
 
-        mViewModel.loadStockIn.observe(this, Observer { gotoStockIn() })
+        mViewModel.loadStockIn.observe(this, Observer {
+            gotoStockIn()
+        })
+        mViewModel.loadStockList.observe(this, Observer {
+            gotoStockList()
+        })
+        mViewModel.loadStockDashboard.observe(this, Observer {
+            gotoStockDashboard()
+        })
 
     }
 
@@ -230,6 +240,18 @@ class SyncedPatientsActivity : ACBaseActivity(), View.OnClickListener {
         val intent = Intent(this, StockInActivity::class.java)
         startActivity(intent)
     }
+
+    fun gotoStockList() {
+        openCloseDrawer()
+        val intent = Intent(this, StockListActivity::class.java)
+        startActivity(intent)
+    }
+    fun gotoStockDashboard() {
+        openCloseDrawer()
+        val intent = Intent(this, StockDashboardActivity::class.java)
+        startActivity(intent)
+    }
+
 
     override fun onRestart() {
         super.onRestart()

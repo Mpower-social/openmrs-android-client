@@ -1,4 +1,4 @@
-package org.intelehealth.app.mpower.activities.stockIn
+package org.intelehealth.app.mpower.activities.stockManagement
 
 import android.os.Bundle
 import android.view.Menu
@@ -11,9 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.intelehealth.app.mpower.R
 import org.intelehealth.app.mpower.activities.ACBaseActivity
 import androidx.databinding.DataBindingUtil
-import org.intelehealth.app.mpower.databinding.ActivityReferedMembersBinding
 import org.intelehealth.app.mpower.databinding.ActivityStockInBinding
-import org.intelehealth.app.mpower.databinding.FragmentReferedMembersBinding
 
 
 @AndroidEntryPoint
@@ -78,9 +76,9 @@ class StockInActivity : ACBaseActivity(), View.OnClickListener {
             override fun onQueryTextChange(query: String): Boolean {
                 val memberListFragment = supportFragmentManager.findFragmentById(R.id.referedMembersContentFrame) as StockInFragment?
                 if(NetworkUtils.isOnline()){
-                    memberListFragment?.fetchReferredMembersOnRefresh(query)
+                   // memberListFragment?.fetchReferredMembersOnRefresh(query)
                 } else {
-                    memberListFragment?.fetchMembers(query)
+                   // memberListFragment?.fetchMembers(query)
                 }
                 return true
             }

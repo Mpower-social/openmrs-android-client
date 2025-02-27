@@ -99,6 +99,8 @@
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="dob_hint">Date of Birth (dd/MM/yyyy)</string>
+    <string name="invoice">Invoice</string>
+    <string name="stock_in_date">Stock In Date</string>
     <string name="date_hint">DOB (dd/MM/yyyy)</string>
     <string name="estyr">Estimated Years</string>
     <string name="estmonth">Estimated Months</string>

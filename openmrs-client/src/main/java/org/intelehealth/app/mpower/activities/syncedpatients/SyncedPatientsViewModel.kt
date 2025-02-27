@@ -234,6 +234,20 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
                 loadStockIn.value = loadStockIn.value != true
             }
         }
+        else if(navDrawer.id == Constants.ITEM_STOCK_LIST) {
+            if(loadStockList.value == null)
+                loadStockList.value = true
+            else {
+                loadStockList.value = loadStockList.value != true
+            }
+        }
+        else if(navDrawer.id == Constants.ITEM_STOCK_DASHBOARD) {
+            if(loadStockDashboard.value == null)
+                loadStockDashboard.value = true
+            else {
+                loadStockDashboard.value = loadStockDashboard.value != true
+            }
+        }
 
     }
 

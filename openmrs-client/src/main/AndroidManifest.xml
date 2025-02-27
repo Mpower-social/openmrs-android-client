@@ -278,6 +278,37 @@
             android:exported="true"
             android:theme="@style/AppThemeMaterialNew"
             android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".activities.stockManagement.StockInActivity"
+            android:configChanges="keyboardHidden|screenSize"
+            android:label="@string/drawer_stock_in"
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeOrig"
+            android:exported="true">
+
+        </activity>
+
+        <activity
+            android:name=".activities.stockManagement.StockListActivity"
+            android:configChanges="keyboardHidden|screenSize"
+            android:label="@string/drawer_stock_list"
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeOrig"
+            android:exported="true">
+
+        </activity>
+        <activity
+            android:name=".activities.stockManagement.StockDashboardActivity"
+            android:configChanges="keyboardHidden|screenSize"
+            android:label="@string/drawer_stock_list"
+            android:launchMode="singleTop"
+            android:theme="@style/AppThemeOrig"
+            android:exported="true">
+
+        </activity>
+
+
         <activity
             android:name="org.intelehealth.app.mpower.webrtc.activity.IDAVideoActivity"
             android:excludeFromRecents="true"

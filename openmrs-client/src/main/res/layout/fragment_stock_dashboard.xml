@@ -9,7 +9,7 @@
             type="org.intelehealth.app.mpower.activities.stockManagement.StockInViewModel" />
     </data>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:tools="http://schemas.android.com/tools"
+    <RelativeLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -30,7 +30,7 @@
                     android:visibility="gone" />
 
                 <LinearLayout
-                    android:id="@+id/top_ll"
+                    android:id="@+id/stock_date_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
@@ -39,7 +39,41 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/std_8dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
 
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/textInputFromDate"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:drawableEnd="@drawable/ic_date_range_24dp"
+                            android:enabled="false">
+
+                            <EditText
+                                android:id="@+id/fromStockInDateEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="From: stock in date"
+                                android:textSize="14sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <ImageButton
+                            android:id="@+id/btnFromStockInDate"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="@dimen/std_8dp"
+                            android:background="@drawable/ic_date_range_24dp"
+                            android:backgroundTint="?android:attr/textColorPrimary" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/std_8dp"
                         android:layout_weight="1"
                         android:orientation="horizontal">
@@ -54,15 +88,15 @@
                             android:enabled="false">
 
                             <EditText
-                                android:id="@+id/stockInDateEditText"
+                                android:id="@+id/toStockInDateEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/stock_in_date"
+                                android:hint="To: stock in date"
                                 android:textSize="14sp" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <ImageButton
-                            android:id="@+id/btnStockInDate"
+                            android:id="@+id/btnToStockInDate"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:layout_gravity="center_vertical"
@@ -72,55 +106,94 @@
 
                     </LinearLayout>
 
+                </LinearLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/textInputLayoutInvoice"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                <LinearLayout
+                    android:id="@+id/invoice_search_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/stock_date_ll"
+                    android:layout_margin="8dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/std_8dp"
+                        android:layout_marginEnd="@dimen/std_8dp"
                         android:layout_weight="1"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
+                        android:orientation="horizontal">
 
-                        <EditText
-                            android:id="@+id/invoiceEditText"
-                            android:layout_width="match_parent"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/textInputLayoutKey"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:hint="@string/invoice"
-                            android:textSize="14sp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:layout_weight="1">
+
+                            <EditText
+                                android:id="@+id/itemProviderEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Item"
+                                android:textSize="14sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btnStockAdd"
+                <LinearLayout
+                    android:id="@+id/btn_ll"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_below="@id/top_ll"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="@dimen/std_16dp"
-                    android:background="@color/primary"
-                    android:drawableStart="@drawable/ic_add"
-                    android:elevation="0dp"
-                    android:padding="@dimen/eight_dp"
-                    android:text="Add"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textSize="18sp"
-                    android:textStyle="normal" />
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/invoice_search_ll"
+                    android:layout_centerHorizontal="true"
+                    android:orientation="horizontal">
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnSearch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_below="@id/invoice_search_ll"
+                        android:layout_margin="8dp"
+                        android:background="@color/primary"
+                        android:elevation="0dp"
+                        android:padding="@dimen/eight_dp"
+                        android:text="Search"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="normal" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnClearSearch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_below="@id/invoice_search_ll"
+                        android:layout_margin="8dp"
+                        android:background="@color/primary"
+                        android:elevation="0dp"
+                        android:padding="@dimen/eight_dp"
+                        android:text="Clear Search"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="normal" />
+
+                </LinearLayout>
+
 
                 <HorizontalScrollView
                     android:id="@+id/scroll_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/btnStockAdd"
+                    android:layout_below="@id/btn_ll"
                     android:layout_margin="8dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="vertical">
 
                         <LinearLayout
@@ -154,6 +227,7 @@
                                 android:text="Item"
                                 android:textColor="@color/black" />
 
+
                             <TextView
                                 android:id="@+id/current_stock_txt"
                                 android:layout_width="120dp"
@@ -162,12 +236,12 @@
                                 android:layout_margin="1dp"
                                 android:background="@color/white"
                                 android:gravity="center"
-                                android:padding="8dp"
+                                android:padding="10dp"
                                 android:text="Current Stock"
                                 android:textColor="@color/black" />
 
                             <TextView
-                                android:id="@+id/quantity_txt"
+                                android:id="@+id/stock_in_txt"
                                 android:layout_width="120dp"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center_vertical"
@@ -175,11 +249,11 @@
                                 android:background="@color/white"
                                 android:gravity="center"
                                 android:padding="10dp"
-                                android:text="Quantity"
+                                android:text="Stock In"
                                 android:textColor="@color/black" />
 
                             <TextView
-                                android:id="@+id/expire_txt"
+                                android:id="@+id/stock_out_txt"
                                 android:layout_width="120dp"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center_vertical"
@@ -187,11 +261,11 @@
                                 android:background="@color/white"
                                 android:gravity="center"
                                 android:padding="10dp"
-                                android:text="Expire"
+                                android:text="Stock Out"
                                 android:textColor="@color/black" />
 
                             <TextView
-                                android:id="@+id/batch_txt"
+                                android:id="@+id/stock_diff_txt"
                                 android:layout_width="120dp"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center_vertical"
@@ -199,68 +273,28 @@
                                 android:background="@color/white"
                                 android:gravity="center"
                                 android:padding="10dp"
-                                android:text="Batch No"
+                                android:text="Stock Diff"
                                 android:textColor="@color/black" />
 
-                            <TextView
-                                android:id="@+id/received_from_txt"
-                                android:layout_width="150dp"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center_vertical"
-                                android:layout_margin="1dp"
-                                android:background="@color/white"
-                                android:gravity="center"
-                                android:padding="10dp"
-                                android:text="Received From"
-                                android:textColor="@color/black" />
-
-                            <TextView
-                                android:layout_width="150dp"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center_vertical"
-                                android:layout_margin="1dp"
-                                android:background="@color/white"
-                                android:gravity="center"
-                                android:padding="10dp"
-                                android:text="Action"
-                                android:textColor="@color/black" />
 
                         </LinearLayout>
 
                         <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/stockInRecyclerView"
+                            android:id="@+id/stockListRecyclerView"
                             android:layout_width="match_parent"
-                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                            android:layout_height="match_parent"
-                            android:layout_below="@id/ll_title" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/std_8dp"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
                     </LinearLayout>
 
                 </HorizontalScrollView>
-
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btnStockSave"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_below="@id/scroll_ll"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="8dp"
-                    android:background="@color/primary"
-                    android:elevation="0dp"
-                    android:padding="@dimen/eight_dp"
-                    android:text="Save"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textSize="18sp"
-                    android:textStyle="normal" />
-
 
             </RelativeLayout>
 
         </androidx.core.widget.NestedScrollView>
 
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </RelativeLayout>
 
 </layout>
