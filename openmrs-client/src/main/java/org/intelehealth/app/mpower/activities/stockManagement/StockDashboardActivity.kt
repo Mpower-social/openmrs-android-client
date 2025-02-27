@@ -60,32 +60,32 @@ class StockDashboardActivity : ACBaseActivity(), View.OnClickListener {
         return true
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.find_locally_and_add_patients_menu, menu)
-
-
-        val searchMenuItem = menu.findItem(R.id.actionSearchLocal)
-        val searchView = menu.findItem(R.id.actionSearchLocal).actionView as SearchView
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                searchView.clearFocus()
-                return true
-            }
-
-            override fun onQueryTextChange(query: String): Boolean {
-                val memberListFragment = supportFragmentManager.findFragmentById(R.id.referedMembersContentFrame) as StockInFragment?
-                if(NetworkUtils.isOnline()){
-                   // memberListFragment?.fetchReferredMembersOnRefresh(query)
-                } else {
-                   // memberListFragment?.fetchMembers(query)
-                }
-                return true
-            }
-        })
-        return true
-    }
+//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+//        super.onCreateOptionsMenu(menu)
+//        menuInflater.inflate(R.menu.find_locally_and_add_patients_menu, menu)
+//
+//
+//        val searchMenuItem = menu.findItem(R.id.actionSearchLocal)
+//        val searchView = menu.findItem(R.id.actionSearchLocal).actionView as SearchView
+//
+//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+//            override fun onQueryTextSubmit(query: String): Boolean {
+//                searchView.clearFocus()
+//                return true
+//            }
+//
+//            override fun onQueryTextChange(query: String): Boolean {
+//                val memberListFragment = supportFragmentManager.findFragmentById(R.id.referedMembersContentFrame) as StockInFragment?
+//                if(NetworkUtils.isOnline()){
+//                   // memberListFragment?.fetchReferredMembersOnRefresh(query)
+//                } else {
+//                   // memberListFragment?.fetchMembers(query)
+//                }
+//                return true
+//            }
+//        })
+//        return true
+//    }
 
     override fun onClick(v: View?) {
         val contentDashboard = mBinding.referedMembersContentFrame

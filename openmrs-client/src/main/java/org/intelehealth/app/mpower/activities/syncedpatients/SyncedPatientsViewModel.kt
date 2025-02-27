@@ -1,7 +1,6 @@
 package org.intelehealth.app.mpower.activities.syncedpatients
 
 import android.content.Context
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import com.openmrs.android_sdk.library.api.repository.PatientRepository
@@ -27,23 +26,102 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class SyncedPatientsViewModel @Inject constructor(private val patientDAO: PatientDAO, private val visitDAO: VisitDAO, private val patientRepository: PatientRepository) : BaseViewModel<List<Patient>>(),
+class SyncedPatientsViewModel @Inject constructor(
+    private val patientDAO: PatientDAO,
+    private val visitDAO: VisitDAO,
+    private val patientRepository: PatientRepository
+) : BaseViewModel<List<Patient>>(),
     ItemClickListener {
     var drawerItems = arrayListOf<NavDrawerItem>()
-    val drawerItemListAdapter: NavDrawerAdapter = NavDrawerAdapter(this, drawerItems)
+    val drawerItemListAdapter: NavigationDrawerAdapter =
+        NavigationDrawerAdapter(drawerItems, onItemClick = { navDrawer ->
+            if (navDrawer.id == Constants.ITEM_FIND_PATIENT) {
+                if (loadFindPatient.value == null)
+                    loadFindPatient.value = true
+                else {
+                    loadFindPatient.value = loadFindPatient.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_ADD_PATIENT) {
+                if (loadAddPatient.value == null)
+                    loadAddPatient.value = true
+                else {
+                    loadAddPatient.value = loadAddPatient.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_ACTIVE_VISITS) {
+                if (loadActiveVisits.value == null)
+                    loadActiveVisits.value = true
+                else {
+                    loadActiveVisits.value = loadActiveVisits.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_FORM_ENTRY) {
+                if (loadFormEntry.value == null)
+                    loadFormEntry.value = true
+                else {
+                    loadFormEntry.value = loadFormEntry.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_MANAGE_PROVIDERS) {
+                if (loadManageProviders.value == null)
+                    loadManageProviders.value = true
+                else {
+                    loadManageProviders.value = loadManageProviders.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_FIND_MEMBER) {
+                if (loadMemberList.value == null)
+                    loadMemberList.value = true
+                else {
+                    loadMemberList.value = loadMemberList.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_REFERRED_MEMBER_LIST) {
+                if (loadReferredMemberList.value == null)
+                    loadReferredMemberList.value = true
+                else {
+                    loadReferredMemberList.value = loadReferredMemberList.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_ADD_MEMBER) {
+                if (loadAddMember.value == null)
+                    loadAddMember.value = true
+                else {
+                    loadAddMember.value = loadAddMember.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_VIDEO_CALL) {
+                if (loadVideoCalls.value == null)
+                    loadVideoCalls.value = true
+                else {
+                    loadVideoCalls.value = loadVideoCalls.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_STOCK_IN) {
+                if (loadStockIn.value == null)
+                    loadStockIn.value = true
+                else {
+                    loadStockIn.value = loadStockIn.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_STOCK_LIST) {
+                if (loadStockList.value == null)
+                    loadStockList.value = true
+                else {
+                    loadStockList.value = loadStockList.value != true
+                }
+            } else if (navDrawer.id == Constants.ITEM_STOCK_DASHBOARD) {
+                if (loadStockDashboard.value == null)
+                    loadStockDashboard.value = true
+                else {
+                    loadStockDashboard.value = loadStockDashboard.value != true
+                }
+            }
+        })
 
-    var loadFindPatient : MutableLiveData<Boolean> = MutableLiveData()
-    var loadAddPatient : MutableLiveData<Boolean> = MutableLiveData()
-    var loadActiveVisits : MutableLiveData<Boolean> = MutableLiveData()
-    var loadFormEntry : MutableLiveData<Boolean> = MutableLiveData()
-    var loadManageProviders : MutableLiveData<Boolean> = MutableLiveData()
-    var loadMemberList : MutableLiveData<Boolean> = MutableLiveData()
-    var loadReferredMemberList : MutableLiveData<Boolean> = MutableLiveData()
-    var loadAddMember : MutableLiveData<Boolean> = MutableLiveData()
-    var loadVideoCalls : MutableLiveData<Boolean> = MutableLiveData()
-    var loadStockIn : MutableLiveData<Boolean> = MutableLiveData()
-    var loadStockList : MutableLiveData<Boolean> = MutableLiveData()
-    var loadStockDashboard : MutableLiveData<Boolean> = MutableLiveData()
+    var loadFindPatient: MutableLiveData<Boolean> = MutableLiveData()
+    var loadAddPatient: MutableLiveData<Boolean> = MutableLiveData()
+    var loadActiveVisits: MutableLiveData<Boolean> = MutableLiveData()
+    var loadFormEntry: MutableLiveData<Boolean> = MutableLiveData()
+    var loadManageProviders: MutableLiveData<Boolean> = MutableLiveData()
+    var loadMemberList: MutableLiveData<Boolean> = MutableLiveData()
+    var loadReferredMemberList: MutableLiveData<Boolean> = MutableLiveData()
+    var loadAddMember: MutableLiveData<Boolean> = MutableLiveData()
+    var loadVideoCalls: MutableLiveData<Boolean> = MutableLiveData()
+    var loadStockIn: MutableLiveData<Boolean> = MutableLiveData()
+    var loadStockList: MutableLiveData<Boolean> = MutableLiveData()
+    var loadStockDashboard: MutableLiveData<Boolean> = MutableLiveData()
 
     fun loadDrawerItems(context: Context) {
         drawerItemListAdapter.updateModuleItems(NavDrawerItem.getNavDrawerItems(context))
@@ -52,24 +130,24 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
     fun fetchSyncedPatients() {
         setLoading()
         addSubscription(patientDAO.allPatients
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { patients: List<Patient> -> setContent(patients) },
-                        { setError(it, OperationType.PatientFetching) }
-                ))
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { patients: List<Patient> -> setContent(patients) },
+                { setError(it, OperationType.PatientFetching) }
+            ))
     }
 
     fun fetchSyncedPatients(query: String) {
         setLoading()
         addSubscription(patientDAO.allPatients
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { patients: List<Patient> ->
-                            val filteredPatients = FilterUtil.getPatientsFilteredByQuery(patients, query)
-                            setContent(filteredPatients)
-                        },
-                        { setError(it, OperationType.PatientSearching) }
-                ))
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { patients: List<Patient> ->
+                    val filteredPatients = FilterUtil.getPatientsFilteredByQuery(patients, query)
+                    setContent(filteredPatients)
+                },
+                { setError(it, OperationType.PatientSearching) }
+            ))
     }
 
     fun fetchSyncedPatientsOnRefresh(query: String) {
@@ -92,9 +170,9 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
     private fun insertServerPatients(patients: List<Patient>) {
         val mPatients: MutableList<Patient> = mutableListOf()
         for (sPatient in patients) {
-            if(sPatient.uuid != null && sPatient.uuid!!.isNotEmpty()){
+            if (sPatient.uuid != null && sPatient.uuid!!.isNotEmpty()) {
                 val isSaved = patientDAO.isUserAlreadySaved(sPatient.uuid!!)
-                if(!isSaved){
+                if (!isSaved) {
                     patientRepository.findPatientDetails(sPatient.uuid)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
@@ -108,7 +186,7 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
                                 sPatient.names = person.names
                                 try {
                                     patientDAO.savePatient(sPatient).single().toBlocking().first()
-                                } catch (e: Error){
+                                } catch (e: Error) {
                                     ToastUtil.error(e.toString())
                                 }
                             }, {
@@ -122,9 +200,9 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
         setContent(patients)
     }
 
-    private fun convertToPatient(rPatientList: List<ReferredPatient>) : List<Patient> {
-        val finalList : MutableList<Patient> = mutableListOf()
-        for (rPerson in rPatientList){
+    private fun convertToPatient(rPatientList: List<ReferredPatient>): List<Patient> {
+        val finalList: MutableList<Patient> = mutableListOf()
+        for (rPerson in rPatientList) {
             finalList.add(rPerson.fromReferredPatient())
         }
         return finalList
@@ -156,98 +234,93 @@ class SyncedPatientsViewModel @Inject constructor(private val patientDAO: Patien
     fun deleteSyncedPatient(patient: Patient) {
         setLoading()
         patientDAO.deletePatient(patient.id!!)
-        addSubscription(visitDAO.deleteVisitsByPatientId(patient.id!!)
+        addSubscription(
+            visitDAO.deleteVisitsByPatientId(patient.id!!)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe())
+                .subscribe()
+        )
     }
 
     fun gotoRegisterPatient(view: View) {
-        if(loadAddPatient.value == null)
+        if (loadAddPatient.value == null)
             loadAddPatient.value = true
     }
 
     override fun onItemClicked(item: Any?) {
         val navDrawer = item as NavDrawerItem
-        if(navDrawer.id == Constants.ITEM_FIND_PATIENT) {
-            if(loadFindPatient.value == null)
-                loadFindPatient.value = true
-            else {
-                loadFindPatient.value = loadFindPatient.value != true
-            }
-        } else if(navDrawer.id == Constants.ITEM_ADD_PATIENT) {
-            if(loadAddPatient.value == null)
-                loadAddPatient.value = true
-            else {
-                loadAddPatient.value = loadAddPatient.value != true
-            }
-        } else if(navDrawer.id == Constants.ITEM_ACTIVE_VISITS) {
-            if(loadActiveVisits.value == null)
-                loadActiveVisits.value = true
-            else {
-                loadActiveVisits.value = loadActiveVisits.value != true
-            }
-        } else if(navDrawer.id == Constants.ITEM_FORM_ENTRY) {
-            if(loadFormEntry.value == null)
-                loadFormEntry.value = true
-            else {
-                loadFormEntry.value = loadFormEntry.value != true
-            }
-        } else if(navDrawer.id == Constants.ITEM_MANAGE_PROVIDERS) {
-            if(loadManageProviders.value == null)
-                loadManageProviders.value = true
-            else {
-                loadManageProviders.value = loadManageProviders.value != true
-            }
-        }
-        else if(navDrawer.id == Constants.ITEM_FIND_MEMBER) {
-            if(loadMemberList.value == null)
-                loadMemberList.value = true
-            else {
-                loadMemberList.value = loadMemberList.value != true
-            }
-        }
-        else if(navDrawer.id == Constants.ITEM_REFERRED_MEMBER_LIST) {
-            if(loadReferredMemberList.value == null)
-                loadReferredMemberList.value = true
-            else {
-                loadReferredMemberList.value = loadReferredMemberList.value != true
-            }
-        }
-        else if(navDrawer.id == Constants.ITEM_ADD_MEMBER) {
-            if(loadAddMember.value == null)
-                loadAddMember.value = true
-            else {
-                loadAddMember.value = loadAddMember.value != true
-            }
-        }
-        else if(navDrawer.id == Constants.ITEM_VIDEO_CALL) {
-            if(loadVideoCalls.value == null)
-                loadVideoCalls.value = true
-            else {
-                loadVideoCalls.value = loadVideoCalls.value != true
-            }
-        }
-        else if(navDrawer.id == Constants.ITEM_STOCK_IN) {
-            if(loadStockIn.value == null)
-                loadStockIn.value = true
-            else {
-                loadStockIn.value = loadStockIn.value != true
-            }
-        }
-        else if(navDrawer.id == Constants.ITEM_STOCK_LIST) {
-            if(loadStockList.value == null)
-                loadStockList.value = true
-            else {
-                loadStockList.value = loadStockList.value != true
-            }
-        }
-        else if(navDrawer.id == Constants.ITEM_STOCK_DASHBOARD) {
-            if(loadStockDashboard.value == null)
-                loadStockDashboard.value = true
-            else {
-                loadStockDashboard.value = loadStockDashboard.value != true
-            }
-        }
+//        if (navDrawer.id == Constants.ITEM_FIND_PATIENT) {
+//            if (loadFindPatient.value == null)
+//                loadFindPatient.value = true
+//            else {
+//                loadFindPatient.value = loadFindPatient.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_ADD_PATIENT) {
+//            if (loadAddPatient.value == null)
+//                loadAddPatient.value = true
+//            else {
+//                loadAddPatient.value = loadAddPatient.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_ACTIVE_VISITS) {
+//            if (loadActiveVisits.value == null)
+//                loadActiveVisits.value = true
+//            else {
+//                loadActiveVisits.value = loadActiveVisits.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_FORM_ENTRY) {
+//            if (loadFormEntry.value == null)
+//                loadFormEntry.value = true
+//            else {
+//                loadFormEntry.value = loadFormEntry.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_MANAGE_PROVIDERS) {
+//            if (loadManageProviders.value == null)
+//                loadManageProviders.value = true
+//            else {
+//                loadManageProviders.value = loadManageProviders.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_FIND_MEMBER) {
+//            if (loadMemberList.value == null)
+//                loadMemberList.value = true
+//            else {
+//                loadMemberList.value = loadMemberList.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_REFERRED_MEMBER_LIST) {
+//            if (loadReferredMemberList.value == null)
+//                loadReferredMemberList.value = true
+//            else {
+//                loadReferredMemberList.value = loadReferredMemberList.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_ADD_MEMBER) {
+//            if (loadAddMember.value == null)
+//                loadAddMember.value = true
+//            else {
+//                loadAddMember.value = loadAddMember.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_VIDEO_CALL) {
+//            if (loadVideoCalls.value == null)
+//                loadVideoCalls.value = true
+//            else {
+//                loadVideoCalls.value = loadVideoCalls.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_STOCK_IN) {
+//            if (loadStockIn.value == null)
+//                loadStockIn.value = true
+//            else {
+//                loadStockIn.value = loadStockIn.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_STOCK_LIST) {
+//            if (loadStockList.value == null)
+//                loadStockList.value = true
+//            else {
+//                loadStockList.value = loadStockList.value != true
+//            }
+//        } else if (navDrawer.id == Constants.ITEM_STOCK_DASHBOARD) {
+//            if (loadStockDashboard.value == null)
+//                loadStockDashboard.value = true
+//            else {
+//                loadStockDashboard.value = loadStockDashboard.value != true
+//            }
+//        }
 
     }
 

@@ -7,7 +7,9 @@ import org.intelehealth.app.mpower.resources.Constants
 class NavDrawerItem(
     var title: String,
     var icon: Int,
-    var id: String
+    var id: String,
+    val subMenuItems: List<NavDrawerItem>? = null,
+    var isExpanded: Boolean = false
     ) {
 
     companion object {
@@ -20,10 +22,13 @@ class NavDrawerItem(
 //            items.add(NavDrawerItem(c.getString(R.string.drawer_add_member), R.drawable.ic_add, Constants.ITEM_ADD_MEMBER))
 //            items.add(NavDrawerItem(c.getString(R.string.drawer_find_member), R.drawable.ic_add, Constants.ITEM_FIND_MEMBER))
             items.add(NavDrawerItem(c.getString(R.string.drawer_referral_list), R.drawable.ic_add, Constants.ITEM_REFERRED_MEMBER_LIST))
-            items.add(NavDrawerItem(c.getString(R.string.drawer_stock_management), R.drawable.ic_add, Constants.ITEM_STOCK_MANAGEMENT))
-            items.add(NavDrawerItem(c.getString(R.string.drawer_stock_in), R.drawable.ic_add, Constants.ITEM_STOCK_IN))
-            items.add(NavDrawerItem(c.getString(R.string.drawer_stock_list), R.drawable.ic_add, Constants.ITEM_STOCK_LIST))
-            items.add(NavDrawerItem(c.getString(R.string.drawer_stock_dashboard), R.drawable.ic_add, Constants.ITEM_STOCK_DASHBOARD))
+
+            val item = NavDrawerItem(c.getString(R.string.drawer_stock_management), R.drawable.ic_add, Constants.ITEM_STOCK_MANAGEMENT,
+                listOf(NavDrawerItem(c.getString(R.string.drawer_stock_in), R.drawable.ic_add, Constants.ITEM_STOCK_IN),
+                    NavDrawerItem(c.getString(R.string.drawer_stock_list), R.drawable.ic_add, Constants.ITEM_STOCK_LIST),
+                    NavDrawerItem(c.getString(R.string.drawer_stock_dashboard), R.drawable.ic_add, Constants.ITEM_STOCK_DASHBOARD)))
+
+            items.add(item)
 //            items.add(NavDrawerItem(c.getString(R.string.drawer_active_visits), R.drawable.ic_add, Constants.ITEM_ACTIVE_VISITS))
 //            items.add(NavDrawerItem(c.getString(R.string.drawer_form_entry), R.drawable.ic_add, Constants.ITEM_FORM_ENTRY))
 //            items.add(NavDrawerItem(c.getString(R.string.drawer_manage_providers), R.drawable.ic_add, Constants.ITEM_MANAGE_PROVIDERS))
