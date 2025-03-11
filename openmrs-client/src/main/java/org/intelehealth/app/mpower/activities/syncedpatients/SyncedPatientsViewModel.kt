@@ -14,6 +14,7 @@ import com.openmrs.android_sdk.library.models.ReferredPatient
 import com.openmrs.android_sdk.utilities.NetworkUtils
 import com.openmrs.android_sdk.utilities.ToastUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import okhttp3.ResponseBody
 import org.intelehealth.app.mpower.activities.BaseViewModel
 import org.intelehealth.app.mpower.listeners.ItemClickListener
 import org.intelehealth.app.mpower.models.NavDrawerItem
@@ -148,6 +149,19 @@ class SyncedPatientsViewModel @Inject constructor(
                 },
                 { setError(it, OperationType.PatientSearching) }
             ))
+    }
+
+    fun getProductList() {
+        if (NetworkUtils.isOnline()) {
+            setLoading()
+            addSubscription(patientRepository.getProductList()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {},
+                    { }
+                )
+            )
+        }
     }
 
     fun fetchSyncedPatientsOnRefresh(query: String) {

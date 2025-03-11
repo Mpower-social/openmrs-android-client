@@ -22,12 +22,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <ProgressBar
-                    android:id="@+id/memberListProgressBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/stock_date_ll"
@@ -146,22 +140,31 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/std_8dp"
                         android:layout_weight="1"
-                        android:orientation="horizontal">
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/textInputLayoutKey"
+                            android:id="@+id/textInputSearch"
+                            android:layout_weight="1"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1">
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
 
                             <EditText
-                                android:id="@+id/itemProviderEditText"
+                                android:id="@+id/itemEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Item, Provider"
+                                android:hint="Search by item name"
                                 android:textSize="14sp" />
                         </com.google.android.material.textfield.TextInputLayout>
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/searchRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/std_8dp"
+                            android:visibility="gone"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
 
 
                     </LinearLayout>
@@ -333,6 +336,14 @@
             </RelativeLayout>
 
         </androidx.core.widget.NestedScrollView>
+
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnStockAdd"

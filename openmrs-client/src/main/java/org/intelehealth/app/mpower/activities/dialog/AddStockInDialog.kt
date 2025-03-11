@@ -5,7 +5,6 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -16,11 +15,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
+import com.openmrs.android_sdk.library.api.responseModel.StockInModel
+import com.openmrs.android_sdk.library.databases.entities.ProductModelEntity
 import org.intelehealth.app.mpower.R
-import com.openmrs.android_sdk.library.databases.entities.StockInModel
+import dagger.hilt.android.AndroidEntryPoint
+import org.intelehealth.app.mpower.activities.stockManagement.StockInViewModel
+import org.intelehealth.app.mpower.utilities.CustomSpinnerAdapter
 import java.util.Calendar
 
 @SuppressLint("ResourceType")
+@AndroidEntryPoint
 class AddStockInDialog(
     private val context: Context,
     private val stockInModel: StockInModel,
@@ -37,69 +42,116 @@ class AddStockInDialog(
     private lateinit var addBtn: AppCompatButton
     private var receivedFrom = ""
     private var item = ""
+    private var productList = listOf<ProductModelEntity>()
+
+    private val viewModel: StockInViewModel by viewModels()
 
 
     @SuppressLint("UseGetLayoutInflater", "NotifyDataSetChanged")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context)
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_stock_in, null)
 
-        itemSpinner = dialogView.findViewById<Spinner>(R.id.spinnerItem)
-        receivedFromSpinner = dialogView.findViewById<Spinner>(R.id.spinnerReceivedFrom)
-        edtCurrentStock = dialogView.findViewById<EditText>(R.id.etCurrentStock)
-        edtQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
-        edtExpire = dialogView.findViewById<EditText>(R.id.expireEditText)
-        edtBatchNo = dialogView.findViewById<EditText>(R.id.etBatchNo)
-        dateBtn = dialogView.findViewById<ImageButton>(R.id.btnStockInDate)
-        addBtn = dialogView.findViewById<AppCompatButton>(R.id.btnStockAdd)
-        setSpinners()
+        return activity?.let {
+            val builder = AlertDialog.Builder(it)
+            val inflater = requireActivity().layoutInflater
+            val dialogView = inflater.inflate(R.layout.dialog_stock_in, null)
 
-        setData(stockInModel)
+            itemSpinner = dialogView.findViewById<Spinner>(R.id.spinnerItem)
+            receivedFromSpinner = dialogView.findViewById<Spinner>(R.id.spinnerReceivedFrom)
+            edtCurrentStock = dialogView.findViewById<EditText>(R.id.etCurrentStock)
+            edtQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
+            edtExpire = dialogView.findViewById<EditText>(R.id.expireEditText)
+            edtBatchNo = dialogView.findViewById<EditText>(R.id.etBatchNo)
+            dateBtn = dialogView.findViewById<ImageButton>(R.id.btnExpireDate)
+            addBtn = dialogView.findViewById<AppCompatButton>(R.id.btnStockAdd)
 
-        dateBtn.setOnClickListener {
-            pickDate()
-        }
+            setReceivedFromSpinners()
 
-        addBtn.setOnClickListener {
-            if (isValid()) {
-                stockInModel.itemName = item
-                stockInModel.currentStock = edtCurrentStock.text.toString().toInt()
-                stockInModel.stockIn = edtQuantity.text.toString().toInt()
-                stockInModel.expireDate = edtExpire.text.toString()
-                stockInModel.batchNo = edtBatchNo.text.toString()
-                stockInModel.receiverFrom = receivedFrom
+            // setData(stockInModel)
 
-                onConfirm(stockInModel).also { dismiss() }
+            dateBtn.setOnClickListener {
+                pickDate()
+            }
+
+            addBtn.setOnClickListener {
+                if (isValid()) {
+                    stockInModel.item = item
+                    stockInModel.currentStock = edtCurrentStock.text.toString().toInt()
+                    stockInModel.quantity = edtQuantity.text.toString().toInt()
+                    stockInModel.expire = edtExpire.text.toString()
+                    stockInModel.batchNo = edtBatchNo.text.toString()
+                    stockInModel.receivedFrom = receivedFrom
+
+                    onConfirm(stockInModel).also { dismiss() }
+                }
+            }
+
+            setupObserver()
+
+            builder.setView(dialogView)
+            builder.create()
+        }?: throw IllegalStateException("Activity cannot be null")
+
+    }
+
+//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+//        super.onViewCreated(view, savedInstanceState)
+//        viewModel.fetchProductList()
+//        setupObserver()
+//
+//    }
+
+    private fun setupObserver() {
+
+        viewModel.productList.observe(viewLifecycleOwner){ result ->
+            if (result.isNotEmpty()) {
+                productList = result
+                setItemSpinner(result)
+                setData(stockInModel)
             }
         }
+    }
 
+    private fun setItemSpinner(result: List<ProductModelEntity>) {
+        val adapter = CustomSpinnerAdapter(context, result)
+        itemSpinner.adapter = adapter
 
-        builder.setView(dialogView)
-        return builder.create()
+        itemSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val selectedItem = result[position]
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
     }
 
     private fun setData(stockInModel: StockInModel) {
         if (stockInModel.currentStock > 0) {
             edtCurrentStock.setText("${stockInModel.currentStock}")
         }
-        if (stockInModel.stockIn > 0) {
-            edtQuantity.setText("${stockInModel.stockIn}")
+        if (stockInModel.quantity > 0) {
+            edtQuantity.setText("${stockInModel.quantity}")
         }
-        if (stockInModel.expireDate.isNotEmpty()) {
-            edtExpire.setText(stockInModel.expireDate)
+        if (stockInModel.expire.isNotEmpty()) {
+            edtExpire.setText(stockInModel.expire)
         }
         if (stockInModel.batchNo.isNotEmpty()) {
             edtBatchNo.setText(stockInModel.batchNo)
         }
 
-        if (stockInModel.itemName.isNotEmpty()) {
-            val preselectedIndex = medicineList.indexOf(stockInModel.itemName)
+        if (stockInModel.item.isNotEmpty()) {
+            val preselectedIndex = productList.indexOfFirst { it.name == stockInModel.item }
             if (preselectedIndex != -1) {
                 itemSpinner.setSelection(preselectedIndex)
             }
         }
-        if (stockInModel.receiverFrom.isNotEmpty()) {
-            val preselectedIndex = receivedFromList.indexOf(stockInModel.receiverFrom)
+        if (stockInModel.receivedFrom.isNotEmpty()) {
+            val preselectedIndex = receivedFromList.indexOf(stockInModel.receivedFrom)
             if (preselectedIndex != -1) {
                 receivedFromSpinner.setSelection(preselectedIndex)
             }
@@ -124,25 +176,25 @@ class AddStockInDialog(
         datePickerDialog.show()
     }
 
-    private fun setSpinners() {
+    private fun setReceivedFromSpinners() {
 
         // item spinner
-        val itemAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, medicineList)
-        itemAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        itemSpinner.adapter = itemAdapter
-
-        itemSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                item = parent.getItemAtPosition(position).toString()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
+//        val itemAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, medicineList)
+//        itemAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        itemSpinner.adapter = itemAdapter
+//
+//        itemSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//            override fun onItemSelected(
+//                parent: AdapterView<*>,
+//                view: View?,
+//                position: Int,
+//                id: Long
+//            ) {
+//                item = parent.getItemAtPosition(position).toString()
+//            }
+//
+//            override fun onNothingSelected(parent: AdapterView<*>) {}
+//        }
 
         // received from spinner
 
@@ -197,35 +249,5 @@ class AddStockInDialog(
         "Other"
     )
 
-    private val medicineList = listOf(
-        "Zinc Dispersible Tablet 20 mg",
-        "Vitamin A 2 Lac IU Capsule",
-        "Vitamin-B-Complex Tablet (Thiamine (B1) 5 mg + Riboflavin 2 mg + Nicotinamide (B3) 20 mg + Pyridoxine (B6) 2 mg)",
-        "Salbutamol Syrup (2 mg/5 ml) 60 ml",
-        "Salbutamol Tablet 2 mg",
-        "Penicillin-V Tablet 250 mg",
-        "Paracetamol Tablet 500 mg",
-        "Paracetamol Suspension (120 mg/5 ml) 60 ml",
-        "Oral Rehydration Salt (for 0.5 litre solution)",
-        "Neomycin & Bacitracin Skin Ointment 10 gm",
-        "Metronidazole Tablet 400 mg",
-        "Hyoscine Butyl-bromide Tablet 10 mg",
-        "Gentian Violet 2% Topical Solution 10 ml",
-        "Ferrous Fumarate & Folic Acid Tablet 200.40 mg (Ferrous Fumarate 400 mg + Folic Acid 0.40 mg)",
-        "Calcium Lactate Tablet 300 mg",
-        "Cotrimoxazole Tablet 960 mg (Sulfamethoxazole 800 mg + Trimethoprim 160 mg)",
-        "Cotrimoxazole Tablet 120 mg (Sulfamethoxazole 100 mg + Trimethoprim 20 mg)",
-        "Cotrimoxazole Tablet 120 mg (Sulfamethoxazole 100 mg + Trimethoprim 20 mg)",
-        "Chlorpheniramine Maleate Tablet 4 mg",
-        "Chlorpheniramine Maleate Syrup (2 mg/5 ml) 60 ml",
-        "Chloramphenicol Eye Drop 0.5%, 10 ml",
-        "Benzoic & Salicylic Acid Ointment 1 kg (Benzoic Acid 6% + Salicylic Acid 3%)",
-        "Benzyl Benzoate Application 0.01% W/V 100 ml",
-        "Antacid Chewable Tablet 650 mg (Aluminium Hydroxide 250 mg + Magnesium Hydroxide 400 mg)",
-        "Amoxicillin 250 mg Capsule",
-        "Amoxicillin 125 mg/5 ml Powder for Suspension 100 ml",
-        "Amoxicillin 125 mg/1.25 ml Powder for Pediatric Drop 15 ml",
-        "Albendazole 400 mg"
-    )
 
 }

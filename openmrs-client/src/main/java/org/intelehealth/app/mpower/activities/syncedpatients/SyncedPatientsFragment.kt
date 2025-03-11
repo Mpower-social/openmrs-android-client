@@ -67,6 +67,7 @@ class SyncedPatientsFragment : BaseFragment(), View.OnClickListener{
             setupListeners()
             setupObserver()
             fetchSyncedPatients()
+            fetchProductList()
 
             swipeLayout.setOnRefreshListener {
                 fetchSyncedPatients()
@@ -91,6 +92,10 @@ class SyncedPatientsFragment : BaseFragment(), View.OnClickListener{
 
     fun fetchSyncedPatients() {
         viewModel.fetchSyncedPatients()
+    }
+
+    fun fetchProductList() {
+        viewModel.getProductList()
     }
 
     fun fetchSyncedPatientsOnRefresh(query: String) {

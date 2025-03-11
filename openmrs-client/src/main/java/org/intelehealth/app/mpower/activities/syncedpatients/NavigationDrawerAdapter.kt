@@ -10,7 +10,6 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.intelehealth.app.mpower.R
-import com.openmrs.android_sdk.library.databases.entities.StockInModel
 import org.intelehealth.app.mpower.listeners.ItemClickListener
 import org.intelehealth.app.mpower.models.NavDrawerItem
 

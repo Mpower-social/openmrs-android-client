@@ -4,16 +4,15 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.openmrs.android_sdk.library.databases.entities.StockListModelEntity
 import org.intelehealth.app.mpower.R
-import com.openmrs.android_sdk.library.databases.entities.StockInModel
 
 class StockListAdapter() :
     RecyclerView.Adapter<StockListAdapter.StockListViewHolder>() {
 
-    private val taskList: ArrayList<StockInModel> = arrayListOf()
+    private val taskList: ArrayList<StockListModelEntity> = arrayListOf()
 
     class StockListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val serial: TextView = view.findViewById(R.id.serial_txt)
@@ -24,7 +23,7 @@ class StockListAdapter() :
         val syncStatus: TextView = view.findViewById(R.id.sync_txt)
         val provider: TextView = view.findViewById(R.id.provider_txt)
 
-        fun bind(item: StockInModel, position: Int) {
+        fun bind(item: StockListModelEntity, position: Int) {
         }
     }
 
@@ -38,14 +37,14 @@ class StockListAdapter() :
         val item = taskList[position]
 
         holder.serial.text = "${position + 1}"
-        holder.itemName.text = item.itemName
-        holder.quantity.text = "${item.stockIn}"
-        holder.stockInDate.text = item.stockInDate
+        holder.itemName.text = item.name
+        holder.quantity.text = "${item.quantity}"
+        holder.stockInDate.text = item.stock_in_date
         holder.invoice.text = item.invoice
-        holder.provider.text = item.provider
+        holder.provider.text = item.username
 
-        if (item.syncStatus == 0) holder.syncStatus.text = "Unsynced"
-        else holder.provider.text = "Synced"
+//        if (item.syncStatus == 0) holder.syncStatus.text = "Unsynced"
+//        else holder.provider.text = "Synced"
 
 
         holder.bind(item, holder.adapterPosition)
@@ -56,7 +55,7 @@ class StockListAdapter() :
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateStockInList(newTasks: ArrayList<StockInModel>) {
+    fun updateStockInList(newTasks: ArrayList<StockListModelEntity>) {
         taskList.clear()
         taskList.addAll(newTasks)
 

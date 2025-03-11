@@ -14,7 +14,6 @@
 
 package com.openmrs.android_sdk.library.api.repository;
 
-import static android.content.ContentValues.TAG;
 import static com.openmrs.android_sdk.library.databases.AppDatabaseHelper.createObservableIO;
 import static com.openmrs.android_sdk.utilities.ApplicationConstants.PRIMARY_KEY_ID;
 
@@ -23,20 +22,15 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -56,7 +50,10 @@ import com.openmrs.android_sdk.library.api.RestServiceBuilder;
 import com.openmrs.android_sdk.library.api.workers.UpdatePatientWorker;
 import com.openmrs.android_sdk.library.dao.EncounterCreateRoomDAO;
 import com.openmrs.android_sdk.library.dao.PatientDAO;
+import com.openmrs.android_sdk.library.dao.ProductDAO;
+import com.openmrs.android_sdk.library.databases.AppDatabase;
 import com.openmrs.android_sdk.library.databases.AppDatabaseHelper;
+import com.openmrs.android_sdk.library.databases.entities.ProductModelEntity;
 import com.openmrs.android_sdk.library.models.CallTokenModel;
 import com.openmrs.android_sdk.library.models.CustomIdGenPatientIdentifiers;
 import com.openmrs.android_sdk.library.models.CustomPatientIdentifier;
@@ -89,6 +86,10 @@ import com.openmrs.android_sdk.utilities.NetworkUtils;
 import com.openmrs.android_sdk.utilities.PatientComparator;
 import com.openmrs.android_sdk.utilities.ToastUtil;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * The type Patient repository.
  */
@@ -97,6 +98,9 @@ public class PatientRepository extends BaseRepository {
     private final PatientDAO patientDAO;
     private final LocationRepository locationRepository;
     private final EncounterRepository encounterRepository;
+
+    private final ProductDAO productDAO = AppDatabase.getDatabase(OpenmrsAndroid.getInstance().getApplicationContext()).productRoomDAO();
+
 
     /**
      * Instantiates a new Patient repository.
@@ -213,7 +217,12 @@ public class PatientRepository extends BaseRepository {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String mjson = gson.toJson(patientCreateDTO);
 
+            Log.d("xxx", "syncPatient: "+mjson);
+
             Response<PatientDto> response = restApi.createPatientDTO(patientCreateDTO).execute();
+            Log.d("xxx", "syncPatient: "+response.code());
+            Log.d("xxx", "syncPatient body: "+response.body());
+            Log.d("xxx", "syncPatient message: "+response.message());
             if (response.isSuccessful()) {
                 PatientDto returnedPatientDto = response.body();
                 patient.setUuid(returnedPatientDto.getUuid());
@@ -232,10 +241,45 @@ public class PatientRepository extends BaseRepository {
         });
     }
 
+    public Observable<ResponseBody> getProductList() {
+        return createObservableIO(() -> {
+            try {
+                Response<ResponseBody> response = restApi.getProductList().execute();
+                if (response.isSuccessful()) {
+                    String body = response.body().string();
+                    JSONArray jsonArray = new JSONArray(body);
+                    productDAO.deleteAll();
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        try {
+                            JSONObject object = jsonArray.getJSONObject(i);
+                            ProductModelEntity productModel = new Gson().fromJson(object.toString(), ProductModelEntity.class);
+                            productDAO.addProduct(productModel);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    return response.body();
+                } else {
+                    throw new Exception("product list error: " + response.message());
+                }
+            } catch (Exception ex) {
+                throw new Exception("product list error: " + ex.toString());
+            }
+        });
+    }
+
     public Observable<ResponseBody> savePatient(final PatientSaveDTO psDTO) {
         return createObservableIO(() -> {
             try{
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String mjson = gson.toJson(psDTO);
+                Log.d("xxx", "savePatient: "+mjson);
+
                 Response<ResponseBody> response = restApi.savePatientDTO(psDTO).execute();
+                Log.d("xxx", "savePatient code: "+response.code());
+                Log.d("xxx", "savePatient body: "+response.body());
+                Log.d("xxx", "savePatient message: "+response.message());
                 if (response.isSuccessful()) {
                     String aa = response.body().toString();
                     return response.body();
@@ -271,11 +315,14 @@ public class PatientRepository extends BaseRepository {
         psDTO.setCountryID(0L);
         psDTO.setLocation(0L);
         psDTO.setBlockID(0L);
+        psDTO.setUpazila("BADDA");
+        psDTO.setUpazilaID("33625");
         psDTO.setBirthdateEstimated(false);
         psDTO.setDeathdateEstimated(false);
         for (PersonAttribute pa : rpDTO.getPerson().getAttributes()) {
             ArrayList<String> values = parseAttributeValue(pa.getDisplay(), "=");
             String attrUUID = values.get(0).trim();
+           // Log.d("xxx", "attrUUID: "+attrUUID);
             String value = values.get(1);
 //            String attrUUID = pa.getUuid();
             if(attrUUID.equals(ApplicationConstants.PATIENTS_BIRTH_PLACE_KEY)){
@@ -424,6 +471,7 @@ public class PatientRepository extends BaseRepository {
                         Gson gson = new GsonBuilder().setPrettyPrinting().create();
                         PatientSaveDTO psDTO = toSavePatientDTO(returnedPatientDto);
                         String mjson = gson.toJson(psDTO);
+                   //     Log.d("xxx", "registerPatient: "+mjson);
                         return savePatient(psDTO)
                                 .map(responseBody -> {
                             patient.setUuid(returnedPatientDto.getUuid());

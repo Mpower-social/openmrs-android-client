@@ -5,10 +5,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.openmrs.android_sdk.library.api.repository.StockRepository
+import com.openmrs.android_sdk.library.api.responseModel.CurrentStockModel
+import com.openmrs.android_sdk.library.api.responseModel.StockInModel
+import com.openmrs.android_sdk.library.api.responseModel.StockListPostModel
 import com.openmrs.android_sdk.library.dao.StockDAO
-import com.openmrs.android_sdk.library.databases.entities.StockInModel
+import com.openmrs.android_sdk.library.databases.entities.ProductModelEntity
+import com.openmrs.android_sdk.library.databases.entities.StockDashboardModelEntity
+import com.openmrs.android_sdk.library.databases.entities.StockListModelEntity
 import com.openmrs.android_sdk.library.models.Patient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import okhttp3.ResponseBody
 import org.intelehealth.app.mpower.activities.BaseViewModel
 import rx.android.schedulers.AndroidSchedulers
 
@@ -25,25 +31,50 @@ class StockInViewModel @Inject constructor(
     private val _stockInsertStatus = MutableLiveData<Boolean>()
     val stockInsertStatus: LiveData<Boolean> get() = _stockInsertStatus
 
-    private val _stockList = MutableLiveData<List<StockInModel>>()
-    val stockList: LiveData<List<StockInModel>> get() = _stockList
+    private val _stockList = MutableLiveData<List<StockListModelEntity>>()
+    val stockList: LiveData<List<StockListModelEntity>> get() = _stockList
 
-    private val _searchStockList = MutableLiveData<List<StockInModel>>()
-    val searchStockList: LiveData<List<StockInModel>> get() = _searchStockList
+    private val _stockDashboard = MutableLiveData<List<StockDashboardModelEntity>>()
+    val stockDashboard: LiveData<List<StockDashboardModelEntity>> get() = _stockDashboard
 
-    fun insertStock(stockList: List<StockInModel>) {
+    private val _productList = MutableLiveData<List<ProductModelEntity>>()
+    val productList: LiveData<List<ProductModelEntity>> get() = _productList
+
+    private val _currentStock = MutableLiveData<CurrentStockModel>()
+    val currentStock: LiveData<CurrentStockModel> get() = _currentStock
+
+    private val _saveStock = MutableLiveData<ResponseBody>()
+    val saveStock: LiveData<ResponseBody> get() = _saveStock
+
+    private val _searchStockList = MutableLiveData<List<StockListModelEntity>>()
+    val searchStockList: LiveData<List<StockListModelEntity>> get() = _searchStockList
+
+    private val _searchStockDashboard = MutableLiveData<List<StockDashboardModelEntity>>()
+    val searchStockDashboard: LiveData<List<StockDashboardModelEntity>> get() = _searchStockDashboard
+
+//    fun insertStock(stockList: List<StockInModel>) {
+//        setLoading()
+//        addSubscription(stockRepository.insertStock(stockList)
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe {
+//                _stockInsertStatus.value = it!!
+//            }
+//        )
+//    }
+
+    fun getStockDashboard(stockListPostModel: StockListPostModel) {
         setLoading()
-        addSubscription(stockRepository.insertStock(stockList)
+        addSubscription(stockRepository.getStockDashboard(stockListPostModel)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                _stockInsertStatus.value = it!!
+                _stockDashboard.value = it
             }
         )
     }
 
-    fun fetchStockList() {
+    fun getStockList(stockListPostModel: StockListPostModel) {
         setLoading()
-        addSubscription(stockRepository.fetchStockList()
+        addSubscription(stockRepository.getStockList(stockListPostModel)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 _stockList.value = it
@@ -51,45 +82,39 @@ class StockInViewModel @Inject constructor(
         )
     }
 
-    fun setSearch(fromDate: String, toDate: String, invoice: String, itemProvider: String) {
-
-        val stringBuilder = StringBuilder()
-        val queryMain = "SELECT * FROM stock_table WHERE "
-
-        if ((fromDate.isNotEmpty() && toDate.isNotEmpty()) || itemProvider.isNotEmpty()) {
-
-            if (fromDate.isNotEmpty() && toDate.isNotEmpty()) {
-                if (stringBuilder.length > 1) {
-                    stringBuilder.append(" AND (stockInDate BETWEEN '$fromDate' AND '${toDate}')")
-                } else {
-                    stringBuilder.append("(stockInDate BETWEEN '$fromDate' AND '${toDate}')")
-                }
+    fun fetchProductList() {
+        setLoading()
+        addSubscription(stockRepository.fetchProductList()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                _productList.value = it
             }
-
-            if (invoice.isNotEmpty()) {
-                if (stringBuilder.length > 1) {
-                    stringBuilder.append(" AND invoice LIKE '%$invoice%'")
-                } else {
-                    stringBuilder.append("invoice LIKE '%$invoice%'")
-                }
-            }
-
-            if (itemProvider.isNotEmpty()) {
-                if (stringBuilder.length > 1) {
-                    stringBuilder.append(" AND (itemName LIKE '%${itemProvider}%' OR provider LIKE '%${itemProvider}%')")
-                } else {
-                    stringBuilder.append("(itemName LIKE '%${itemProvider}%' OR provider LIKE '%${itemProvider}%')")
-                }
-            }
-        }
-
-        val query = SimpleSQLiteQuery("${queryMain}${stringBuilder}")
-        searchStockList(query)
+        )
     }
 
-    private fun searchStockList(query: SupportSQLiteQuery) {
+    fun saveStock(stockList: List<StockInModel>) {
         setLoading()
-        addSubscription(stockRepository.searchStockList(query)
+        addSubscription(stockRepository.saveStock(stockList)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                _saveStock.value = it
+            }
+        )
+    }
+
+    fun getCurrentStock(id: String) {
+        setLoading()
+        addSubscription(stockRepository.getCurrentStock(id)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                _currentStock.value = it
+            }
+        )
+    }
+
+     fun searchStockList(stockListPostModel: StockListPostModel, name:String) {
+        setLoading()
+        addSubscription(stockRepository.searchList(stockListPostModel, name)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 _searchStockList.value = it
@@ -97,21 +122,14 @@ class StockInViewModel @Inject constructor(
         )
     }
 
-
-    fun fetchReferredMembersOnRefresh(query: String) {
-//        if (NetworkUtils.isOnline()) {
-//            setLoading()
-//            addSubscription(patientRepository.findReferredPatients(query)
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(
-//                    { patients: List<ReferredPatient> ->
-////                        insertServerMembers(patients)
-////                        setContent(patients)
-//                    },
-//                    { setError(it, OperationType.MemberFetching) }
-//                )
-//            )
-//        }
+    fun searchStockDashboard(stockListPostModel: StockListPostModel, name:String) {
+        setLoading()
+        addSubscription(stockRepository.searchDashboard(stockListPostModel, name)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                _searchStockDashboard.value = it
+            }
+        )
     }
 
 

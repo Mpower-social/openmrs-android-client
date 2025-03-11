@@ -4,16 +4,16 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.openmrs.android_sdk.library.databases.entities.StockDashboardModelEntity
+import com.openmrs.android_sdk.library.databases.entities.StockListModelEntity
 import org.intelehealth.app.mpower.R
-import com.openmrs.android_sdk.library.databases.entities.StockInModel
 
 class StockDashboardAdapter() :
     RecyclerView.Adapter<StockDashboardAdapter.StockListViewHolder>() {
 
-    private val taskList: ArrayList<StockInModel> = arrayListOf()
+    private val taskList: ArrayList<StockDashboardModelEntity> = arrayListOf()
 
     class StockListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val serial: TextView = view.findViewById(R.id.serial_txt)
@@ -23,7 +23,7 @@ class StockDashboardAdapter() :
         val stockOut: TextView = view.findViewById(R.id.stock_out_txt)
         val stockDiff: TextView = view.findViewById(R.id.stock_diff_txt)
 
-        fun bind(item: StockInModel, position: Int) {
+        fun bind(item: StockDashboardModelEntity, position: Int) {
         }
     }
 
@@ -37,13 +37,11 @@ class StockDashboardAdapter() :
         val item = taskList[position]
 
         holder.serial.text = "${position + 1}"
-        holder.itemName.text = item.itemName
-        holder.currentStock.text = "${item.currentStock}"
-        holder.stockIn.text = "${item.stockIn}"
-        val stockOut = item.stockIn - item.currentStock
-        holder.stockOut.text = "${stockOut}"
-        val stockDiff = item.stockIn - stockOut
-        holder.stockDiff.text = "${stockDiff}"
+        holder.itemName.text = item.name
+        holder.currentStock.text = "${item.currentstock}"
+        holder.stockIn.text = "${item.stockin}"
+        holder.stockOut.text = "${item.stockout}"
+        holder.stockDiff.text = "${item.adjust_amount}"
 
 
         holder.bind(item, holder.adapterPosition)
@@ -54,7 +52,7 @@ class StockDashboardAdapter() :
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateStockInList(newTasks: ArrayList<StockInModel>) {
+    fun updateStockInList(newTasks: ArrayList<StockDashboardModelEntity>) {
         taskList.clear()
         taskList.addAll(newTasks)
 

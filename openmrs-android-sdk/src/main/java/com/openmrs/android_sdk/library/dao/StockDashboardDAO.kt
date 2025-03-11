@@ -15,27 +15,28 @@ package com.openmrs.android_sdk.library.dao
 
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.openmrs.android_sdk.library.databases.entities.StockDashboardModelEntity
 import com.openmrs.android_sdk.library.databases.entities.StockListModelEntity
 
 /**
  * The interface Visit room dao.
  */
 @Dao
-interface StockDAO {
+interface StockDashboardDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addStock(task: StockListModelEntity): Long
+    fun addStockDashboard(task: StockDashboardModelEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addStock(products: List<StockListModelEntity>): List<Long>
+    fun addStockDashboard(products: List<StockDashboardModelEntity>): List<Long>
 
-    @Query("SELECT * FROM stock_table")
-    fun getAllStock(): List<StockListModelEntity>
+    @Query("SELECT * FROM stock_dashboard_table")
+    fun getAllStock(): List<StockDashboardModelEntity>
 
     @RawQuery
-    fun searchStock(query: SupportSQLiteQuery): List<StockListModelEntity>
+    fun searchStockDashboard(query: SupportSQLiteQuery): List<StockDashboardModelEntity>
 
-    @Query("DELETE FROM stock_table")
+    @Query("DELETE FROM stock_dashboard_table")
     fun deleteAll()
 
 

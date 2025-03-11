@@ -25,7 +25,7 @@ class PatientSaveDTO : Person() {
     @Expose
     var resourceVersion: String? = null
 
-    @SerializedName("personUUID")
+    @SerializedName("personUuid")
     @Expose
     var personUUID: String? = null
 
@@ -141,27 +141,27 @@ class PatientSaveDTO : Person() {
     @Expose
     var patientAddress: String? = null
 
-    @SerializedName("unionID")
+    @SerializedName("unionId")
     @Expose
     var unionID: String? = "0"
 
-    @SerializedName("divisionID")
+    @SerializedName("divisionId")
     @Expose
     var divisionID: String? = null
 
-    @SerializedName("districtID")
+    @SerializedName("districtId")
     @Expose
     var districtID: String? = null
 
-    @SerializedName("upazilaID")
+    @SerializedName("upazilaId")
     @Expose
     var upazilaID: String? = null
 
-    @SerializedName("paurasavaID")
+    @SerializedName("paurasavaId")
     @Expose
     var paurasavaID: String? = null
 
-    @SerializedName("wardID")
+    @SerializedName("wardId")
     @Expose
     var wardID: String? = "0"
 
@@ -169,11 +169,11 @@ class PatientSaveDTO : Person() {
     @Expose
     var location: Long? = 0
 
-    @SerializedName("countryID")
+    @SerializedName("countryId")
     @Expose
     var countryID: Long? = 0
 
-    @SerializedName("blockID")
+    @SerializedName("blockId")
     @Expose
     var blockID: Long? = 0
 

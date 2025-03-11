@@ -6,6 +6,7 @@ import com.openmrs.android_sdk.library.dao.AppointmentRoomDAO
 import com.openmrs.android_sdk.library.dao.ConceptRoomDAO
 import com.openmrs.android_sdk.library.dao.ProviderRoomDAO
 import com.openmrs.android_sdk.library.dao.StockDAO
+import com.openmrs.android_sdk.library.dao.StockDashboardDAO
 import com.openmrs.android_sdk.library.databases.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -46,6 +47,11 @@ object AppDatabaseModule {
     @Singleton
     fun provideStockDAO(@ApplicationContext context: Context): StockDAO =
         AppDatabase.getDatabase(context).stockDAO()
+
+    @Provides
+    @Singleton
+    fun provideStockDashboardDAO(@ApplicationContext context: Context): StockDashboardDAO =
+        AppDatabase.getDatabase(context).stockDashboardDAO()
 }
 
 

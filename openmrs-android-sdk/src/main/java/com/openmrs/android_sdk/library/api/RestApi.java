@@ -10,21 +10,9 @@
 
 package com.openmrs.android_sdk.library.api;
 
-import java.util.List;
-import java.util.Map;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.DELETE;
-import retrofit2.http.GET;
-import retrofit2.http.Headers;
-import retrofit2.http.POST;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
-import retrofit2.http.QueryMap;
-import retrofit2.http.Url;
-
+import com.openmrs.android_sdk.library.api.responseModel.CurrentStockModel;
+import com.openmrs.android_sdk.library.api.responseModel.StockInModel;
+import com.openmrs.android_sdk.library.api.responseModel.StockListPostModel;
 import com.openmrs.android_sdk.library.databases.entities.ConceptEntity;
 import com.openmrs.android_sdk.library.databases.entities.FormResourceEntity;
 import com.openmrs.android_sdk.library.databases.entities.LocationEntity;
@@ -53,18 +41,15 @@ import com.openmrs.android_sdk.library.models.Observation;
 import com.openmrs.android_sdk.library.models.OrderCreate;
 import com.openmrs.android_sdk.library.models.OrderGet;
 import com.openmrs.android_sdk.library.models.Patient;
-import com.openmrs.android_sdk.library.models.PatientCreate;
 import com.openmrs.android_sdk.library.models.PatientCreateDTO;
 import com.openmrs.android_sdk.library.models.PatientDto;
 import com.openmrs.android_sdk.library.models.PatientDtoUpdate;
 import com.openmrs.android_sdk.library.models.PatientPhoto;
 import com.openmrs.android_sdk.library.models.PatientSaveDTO;
-import com.openmrs.android_sdk.library.models.Person;
 import com.openmrs.android_sdk.library.models.ProgramCreate;
 import com.openmrs.android_sdk.library.models.ProgramGet;
 import com.openmrs.android_sdk.library.models.Provider;
 import com.openmrs.android_sdk.library.models.RTCToken;
-import com.openmrs.android_sdk.library.models.ReferredPatientResponse;
 import com.openmrs.android_sdk.library.models.Resource;
 import com.openmrs.android_sdk.library.models.Results;
 import com.openmrs.android_sdk.library.models.SearchRequest;
@@ -77,6 +62,21 @@ import com.openmrs.android_sdk.library.models.TimeSlot;
 import com.openmrs.android_sdk.library.models.User;
 import com.openmrs.android_sdk.library.models.Visit;
 import com.openmrs.android_sdk.library.models.VisitType;
+
+import java.util.List;
+import java.util.Map;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.Headers;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
+import retrofit2.http.Url;
 
 /**
  * The interface Rest api.
@@ -189,6 +189,27 @@ public interface RestApi {
     @GET("patient?lastviewed&v=full")
     Call<Results<Patient>> getLastViewedPatients(@Query("limit") Integer limit,
                                                  @Query("startIndex") Integer startIndex);
+
+    @Headers({"Content-Type: application/json"})
+    @GET("stock/all-product")
+    Call<ResponseBody> getProductList();
+
+    @Headers({"Content-Type: application/json"})
+    @GET("stock/getCurrentStockByItem/{id}")
+    Call<CurrentStockModel> getCurrentStock(@Path("id") String id);
+
+    @Headers({"Content-Type: application/json"})
+    @POST("stock/save")
+    Call<ResponseBody> saveStock(@Body List<StockInModel> stockInModels);
+
+    @Headers({"Content-Type: application/json"})
+    @POST("stock/list")
+    Call<ResponseBody> stockList(@Body StockListPostModel stockListPostModel);
+
+    @Headers({"Content-Type: application/json"})
+    @POST("stock/dashboard")
+    Call<ResponseBody> stockDashboard(@Body StockListPostModel stockListPostModel);
+
 
     /**
      * Create patient call.

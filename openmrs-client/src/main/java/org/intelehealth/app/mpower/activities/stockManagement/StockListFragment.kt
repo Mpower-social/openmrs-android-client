@@ -2,24 +2,22 @@ package org.intelehealth.app.mpower.activities.stockManagement
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.sqlite.db.SimpleSQLiteQuery
+import com.openmrs.android_sdk.library.api.responseModel.StockListPostModel
+import com.openmrs.android_sdk.library.databases.entities.ProductModelEntity
+import com.openmrs.android_sdk.library.databases.entities.StockListModelEntity
 import dagger.hilt.android.AndroidEntryPoint
 import org.intelehealth.app.mpower.activities.BaseFragment
-import org.intelehealth.app.mpower.activities.dialog.AddStockInDialog
-import org.intelehealth.app.mpower.activities.stockManagement.adapter.StockInAdapter
-import com.openmrs.android_sdk.library.databases.entities.StockInModel
+import org.intelehealth.app.mpower.activities.stockManagement.adapter.ProductItemAdapter
 import org.intelehealth.app.mpower.activities.stockManagement.adapter.StockListAdapter
-import org.intelehealth.app.mpower.databinding.FragmentStockInBinding
 import org.intelehealth.app.mpower.databinding.FragmentStockListBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -33,7 +31,11 @@ class StockListFragment : BaseFragment() {
     private lateinit var stockListAdapter: StockListAdapter
 
     private val viewModel: StockInViewModel by viewModels()
-    private var stockInList: ArrayList<StockInModel> = arrayListOf()
+    private var stockList: ArrayList<StockListModelEntity> = arrayListOf()
+    private var productList = listOf<ProductModelEntity>()
+    private var drugId = 0
+    private lateinit var productItemAdapter: ProductItemAdapter
+
 
     companion object {
         fun newInstance(): StockListFragment {
@@ -57,6 +59,9 @@ class StockListFragment : BaseFragment() {
             stockListAdapter = StockListAdapter()
             stockListRecyclerView.adapter = stockListAdapter
 
+            initItemAdapter()
+
+
             btnStockAdd.setOnClickListener { gotoStockIn() }
 
             btnFromStockInDate.setOnClickListener { pickDate(1) }
@@ -65,25 +70,78 @@ class StockListFragment : BaseFragment() {
             btnSearch.setOnClickListener { setSearch() }
             btnClearSearch.setOnClickListener { clearField() }
 
+            itemEditText.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+                }
+
+                override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    if (text != null) {
+                        if (text.isNotEmpty()) {
+                            searchRecyclerView.visibility = View.VISIBLE
+                            val searchList = getSearchList(text)
+                            productItemAdapter.updateStockInList(searchList)
+                            productItemAdapter.notifyDataSetChanged()
+                        }
+                    }
+                }
+
+                override fun afterTextChanged(p0: Editable?) {
+
+                }
+
+            })
+
             fetchStockList()
+            fetchProductList()
             setupObserver()
         }
     }
 
+    private fun getSearchList(text: CharSequence): ArrayList<ProductModelEntity> {
+        val list = ArrayList<ProductModelEntity>()
+
+        productList.forEach { it ->
+            if (it.name?.lowercase()?.contains(text.toString().lowercase()) == true) {
+                list.add(it)
+            }
+        }
+
+        return list
+    }
+
+    private fun initItemAdapter() {
+
+        productItemAdapter = ProductItemAdapter(object : ProductItemAdapter.ItemClickListener {
+            override fun onItemClick(item: ProductModelEntity, position: Int) {
+                drugId = item.id!!
+                binding.itemEditText.setText(item.name.toString())
+                binding.searchRecyclerView.visibility = View.GONE
+            }
+
+        })
+
+        binding.searchRecyclerView.adapter = productItemAdapter
+    }
+
     private fun clearField() {
-        binding.itemProviderEditText.setText("")
+        binding.progressBar.visibility = View.VISIBLE
+        binding.itemEditText.setText("")
         binding.invoiceEditText.setText("")
         binding.fromStockInDateEditText.setText("")
         binding.toStockInDateEditText.setText("")
+        drugId = 0
         fetchStockList()
     }
 
     private fun setSearch() {
-        val fromDate = binding.fromStockInDateEditText.text.toString()
-        val toDate = binding.toStockInDateEditText.text.toString()
+        binding.progressBar.visibility = View.VISIBLE
+        val startDate = binding.fromStockInDateEditText.text.toString()
+        val endDate = binding.toStockInDateEditText.text.toString()
         val invoice = binding.invoiceEditText.text.toString()
-        val itemProvider = binding.itemProviderEditText.text.toString()
-        viewModel.setSearch(fromDate, toDate, invoice, itemProvider)
+        val name = binding.itemEditText.text.toString()
+
+        viewModel.searchStockList(StockListPostModel(drugId, startDate, endDate, invoice), name)
     }
 
     private fun gotoStockIn() {
@@ -93,32 +151,45 @@ class StockListFragment : BaseFragment() {
     }
 
     private fun fetchStockList() {
-        viewModel.fetchStockList()
+        viewModel.getStockList(StockListPostModel())
+    }
+
+    private fun fetchProductList() {
+        viewModel.fetchProductList()
     }
 
     private fun setupObserver() {
 
-        viewModel.stockList.observe(viewLifecycleOwner, Observer { result ->
+        viewModel.productList.observe(viewLifecycleOwner, Observer { result ->
             if (result.isNotEmpty()) {
-                stockInList.clear()
-                stockInList.addAll(result)
-                updateAdapter(stockInList)
+                productList = result
+            }
+        })
+
+        viewModel.stockList.observe(viewLifecycleOwner, Observer { result ->
+            binding.progressBar.visibility = View.GONE
+
+            if (result.isNotEmpty()) {
+                stockList.clear()
+                stockList.addAll(result)
+                updateAdapter(stockList)
 
             }
         })
 
         viewModel.searchStockList.observe(viewLifecycleOwner, Observer { result ->
+            binding.progressBar.visibility = View.GONE
             if (result.isNotEmpty()) {
-                stockInList.clear()
-                stockInList.addAll(result)
-                updateAdapter(stockInList)
-
+                stockList.clear()
+                stockList.addAll(result)
+                updateAdapter(stockList)
             }
         })
     }
 
+
     @SuppressLint("NotifyDataSetChanged")
-    private fun updateAdapter(stockInList: ArrayList<StockInModel>) {
+    private fun updateAdapter(stockInList: ArrayList<StockListModelEntity>) {
         stockListAdapter.updateStockInList(stockInList)
         stockListAdapter.notifyDataSetChanged()
     }
@@ -140,17 +211,11 @@ class StockListFragment : BaseFragment() {
     }
 
     private fun formatDateTime(type: Int) {
-        val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.US)
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         val formattedDate = sdf.format(calendar.time)
         if (type == 1) binding.fromStockInDateEditText.setText(formattedDate)
         else binding.toStockInDateEditText.setText(formattedDate)
     }
-
-
-//    fun fetchReferredMembersOnRefresh(query: String) {
-//        viewModel.fetchReferredMembersOnRefresh(query)
-//    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

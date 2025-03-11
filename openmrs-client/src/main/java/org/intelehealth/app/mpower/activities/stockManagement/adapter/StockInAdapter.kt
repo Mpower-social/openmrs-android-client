@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.openmrs.android_sdk.library.api.responseModel.StockInModel
 import org.intelehealth.app.mpower.R
-import com.openmrs.android_sdk.library.databases.entities.StockInModel
 
 class StockInAdapter(private val listener: ItemClickListener) :
     RecyclerView.Adapter<StockInAdapter.StockInViewHolder>() {
@@ -47,12 +47,12 @@ class StockInAdapter(private val listener: ItemClickListener) :
         val item = taskList[position]
 
         holder.serial.text = "${position + 1}"
-        holder.itemName.text = item.itemName
+        holder.itemName.text = item.item
         holder.currentStock.text = "${item.currentStock}"
-        holder.quantity.text = "${item.stockIn}"
-        holder.expireDate.text = item.expireDate
+        holder.quantity.text = "${item.quantity}"
+        holder.expireDate.text = item.expire
         holder.batchNo.text = item.batchNo
-        holder.receivedFrom.text = item.receiverFrom
+        holder.receivedFrom.text = item.receivedFrom
 
         holder.bind(item, listener, holder.adapterPosition)
     }
