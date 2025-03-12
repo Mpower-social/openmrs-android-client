@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -217,16 +219,12 @@ public class PatientRepository extends BaseRepository {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String mjson = gson.toJson(patientCreateDTO);
 
-            Log.d("xxx", "syncPatient: "+mjson);
-
             Response<PatientDto> response = restApi.createPatientDTO(patientCreateDTO).execute();
-            Log.d("xxx", "syncPatient: "+response.code());
-            Log.d("xxx", "syncPatient body: "+response.body());
-            Log.d("xxx", "syncPatient message: "+response.message());
             if (response.isSuccessful()) {
                 PatientDto returnedPatientDto = response.body();
                 patient.setUuid(returnedPatientDto.getUuid());
                 patient.getPerson().setAttributes(returnedPatientDto.getPerson().getAttributes());
+                patient.getPerson().setDisplay(returnedPatientDto.getPerson().getDisplay());
                 patient.setIdentifiers(returnedPatientDto.getIdentifiers());
                 patientDAO.updatePatient(patient.getId(), patient);
 
@@ -236,8 +234,10 @@ public class PatientRepository extends BaseRepository {
 
                 return returnedPatientDto;
             } else {
-                throw new Exception("syncPatient error: " + response.message());
+                //Log.d("xxx", "syncPatient error: "+response.errorBody());
+                throw new Exception("syncPatient error: " + response.errorBody());
             }
+
         });
     }
 
@@ -274,20 +274,19 @@ public class PatientRepository extends BaseRepository {
             try{
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 String mjson = gson.toJson(psDTO);
-                Log.d("xxx", "savePatient: "+mjson);
 
-                Response<ResponseBody> response = restApi.savePatientDTO(psDTO).execute();
-                Log.d("xxx", "savePatient code: "+response.code());
-                Log.d("xxx", "savePatient body: "+response.body());
-                Log.d("xxx", "savePatient message: "+response.message());
+                RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), mjson);
+
+                Response<ResponseBody> response = restApi.savePatientDTO(requestBody).execute();
                 if (response.isSuccessful()) {
-                    String aa = response.body().toString();
+                   // String aa = response.body().toString();
                     return response.body();
                 } else {
-                    throw new Exception("syncPatient error: " + response.message());
+                    throw new Exception("savePatient error: " + response.message());
                 }
             } catch (Exception ex) {
-                throw new Exception("syncPatient error: " + ex.toString());
+                throw new Exception("savePatient error: " + ex.toString());
+
             }
         });
     }

@@ -15,6 +15,7 @@ package org.intelehealth.app.mpower.activities.syncedpatients
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -118,6 +119,7 @@ class SyncedPatientsFragment : BaseFragment(), View.OnClickListener{
     }
 
     private fun showPatientsList(patients: List<Patient>) {
+        Log.d("xxx", "showPatientsList: "+patients.size)
         with(binding) {
             syncedPatientsInitialProgressBar.makeGone()
             if (patients.isEmpty()) {

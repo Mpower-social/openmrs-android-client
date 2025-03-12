@@ -1,6 +1,7 @@
 package org.intelehealth.app.mpower.activities.syncedpatients
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import com.openmrs.android_sdk.library.api.repository.PatientRepository

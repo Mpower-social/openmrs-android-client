@@ -74,10 +74,12 @@ object FilterUtil {
         val patientIdentifier = patient?.identifier?.identifier
         val fullName = patient?.name?.nameString
         val givenFamilyName = "${patient?.name?.givenName} ${" "} ${patient?.name?.familyName}"
+        val displayName = patient?.display
         val searchableWords: MutableList<String?> = ArrayList()
         searchableWords.add(patientIdentifier)
         searchableWords.add(fullName)
         searchableWords.add(givenFamilyName)
+        searchableWords.add(displayName)
         return searchableWords
     }
 

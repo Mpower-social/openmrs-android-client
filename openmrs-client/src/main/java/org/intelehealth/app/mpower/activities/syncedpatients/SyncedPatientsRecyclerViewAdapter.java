@@ -16,11 +16,7 @@ package org.intelehealth.app.mpower.activities.syncedpatients;
 
 import static org.intelehealth.app.mpower.utilities.ViewUtils.adjustOpacity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,16 +33,16 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.openmrs.android_sdk.library.models.Patient;
 import com.openmrs.android_sdk.utilities.ApplicationConstants;
 import com.openmrs.android_sdk.utilities.DateUtils;
 
 import org.intelehealth.app.mpower.R;
 import org.intelehealth.app.mpower.activities.ACBaseActivity;
-import org.intelehealth.app.mpower.activities.memberList.MemberListActivity;
 import org.intelehealth.app.mpower.activities.memberProfile.MemberProfileActivity;
-import org.intelehealth.app.mpower.activities.patientdashboard.PatientDashboardActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SyncedPatientsRecyclerViewAdapter extends RecyclerView.Adapter<SyncedPatientsRecyclerViewAdapter.PatientViewHolder> {
     private SyncedPatientsFragment mContext;
@@ -111,19 +107,20 @@ public class SyncedPatientsRecyclerViewAdapter extends RecyclerView.Adapter<Sync
             holder.mIdentifier.setText(patientIdentifier);
         }
 
-        String name = "";
-        if(patient.getPerson().getName().getGivenName() != null && !patient.getPerson().getName().getGivenName().isEmpty()){
-            name = name + patient.getPerson().getName().getGivenName();
-        }
-
-        if(patient.getPerson().getName().getFamilyName() != null && !patient.getPerson().getName().getFamilyName().isEmpty()){
-            name = name + " "+ patient.getPerson().getName().getFamilyName();
-        }
-        holder.mDisplayName.setText(name);
-
-//        if (null != patient.getPerson().getDisplay()) {
-//            holder.mDisplayName.setText(patient.getPerson().getDisplay());
+//        String name = "";
+//        if (patient.getPerson().getName().getGivenName() != null && !patient.getPerson().getName().getGivenName().isEmpty()) {
+//            name = name + patient.getPerson().getName().getGivenName();
 //        }
+//
+//        if (patient.getPerson().getName().getFamilyName() != null && !patient.getPerson().getName().getFamilyName().isEmpty()) {
+//            name = name + " " + patient.getPerson().getName().getFamilyName();
+//        }
+//        holder.mDisplayName.setText(name);
+
+        if (null != patient.getPerson().getDisplay()) {
+            holder.mDisplayName.setText(patient.getPerson().getDisplay());
+        }
+
         if (null != patient.getGender()) {
             if (patient.getPhoto() != null) {
                 holder.mGender.setImageBitmap(patient.getPhoto());

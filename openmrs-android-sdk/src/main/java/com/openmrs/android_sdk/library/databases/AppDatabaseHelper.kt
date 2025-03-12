@@ -15,6 +15,7 @@ package com.openmrs.android_sdk.library.databases
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import com.google.gson.Gson
 import com.openmrs.android_sdk.library.OpenmrsAndroid
 import com.openmrs.android_sdk.library.api.repository.FormRepository
@@ -23,45 +24,45 @@ import com.openmrs.android_sdk.library.dao.EncounterRoomDAO
 import com.openmrs.android_sdk.library.dao.ObservationDAO
 import com.openmrs.android_sdk.library.dao.PatientDAO
 import com.openmrs.android_sdk.library.databases.entities.AllergyEntity
-import com.openmrs.android_sdk.library.databases.entities.EncounterEntity
-import com.openmrs.android_sdk.library.databases.entities.ObservationEntity
-import com.openmrs.android_sdk.library.databases.entities.StandaloneEncounterEntity
-import com.openmrs.android_sdk.library.databases.entities.LocationEntity
-import com.openmrs.android_sdk.library.databases.entities.VisitEntity
-import com.openmrs.android_sdk.library.databases.entities.TimeSlotEntity
-import com.openmrs.android_sdk.library.databases.entities.PatientEntity
-import com.openmrs.android_sdk.library.databases.entities.StandaloneObservationEntity
-import com.openmrs.android_sdk.library.databases.entities.AppointmentEntity
-import com.openmrs.android_sdk.library.databases.entities.AppointmentTypeEntity
-import com.openmrs.android_sdk.library.databases.entities.AppointmentLocationEntity
-import com.openmrs.android_sdk.library.databases.entities.AppointmentProviderEntity
-import com.openmrs.android_sdk.library.databases.entities.AppointmentPatientEntity
 import com.openmrs.android_sdk.library.databases.entities.AppointmentBlockEntity
+import com.openmrs.android_sdk.library.databases.entities.AppointmentEntity
+import com.openmrs.android_sdk.library.databases.entities.AppointmentLocationEntity
+import com.openmrs.android_sdk.library.databases.entities.AppointmentPatientEntity
+import com.openmrs.android_sdk.library.databases.entities.AppointmentProviderEntity
+import com.openmrs.android_sdk.library.databases.entities.AppointmentTypeEntity
 import com.openmrs.android_sdk.library.databases.entities.AppointmentVisitEntity
 import com.openmrs.android_sdk.library.databases.entities.DosageFormEntity
 import com.openmrs.android_sdk.library.databases.entities.DrugConceptEntity
 import com.openmrs.android_sdk.library.databases.entities.DrugEntity
+import com.openmrs.android_sdk.library.databases.entities.EncounterEntity
+import com.openmrs.android_sdk.library.databases.entities.LocationEntity
+import com.openmrs.android_sdk.library.databases.entities.ObservationEntity
 import com.openmrs.android_sdk.library.databases.entities.OrderEntity
+import com.openmrs.android_sdk.library.databases.entities.PatientEntity
 import com.openmrs.android_sdk.library.databases.entities.ProgramEntity
+import com.openmrs.android_sdk.library.databases.entities.StandaloneEncounterEntity
+import com.openmrs.android_sdk.library.databases.entities.StandaloneObservationEntity
+import com.openmrs.android_sdk.library.databases.entities.TimeSlotEntity
+import com.openmrs.android_sdk.library.databases.entities.VisitEntity
 import com.openmrs.android_sdk.library.di.entrypoints.RepositoryEntryPoint
 import com.openmrs.android_sdk.library.models.Allergen
 import com.openmrs.android_sdk.library.models.Allergy
+import com.openmrs.android_sdk.library.models.Appointment
+import com.openmrs.android_sdk.library.models.ConceptClass
+import com.openmrs.android_sdk.library.models.Drug
 import com.openmrs.android_sdk.library.models.Encounter
 import com.openmrs.android_sdk.library.models.EncounterType
 import com.openmrs.android_sdk.library.models.Observation
+import com.openmrs.android_sdk.library.models.OrderGet
 import com.openmrs.android_sdk.library.models.Patient
 import com.openmrs.android_sdk.library.models.PatientIdentifier
+import com.openmrs.android_sdk.library.models.Person
 import com.openmrs.android_sdk.library.models.PersonAddress
 import com.openmrs.android_sdk.library.models.PersonName
+import com.openmrs.android_sdk.library.models.ProgramGet
 import com.openmrs.android_sdk.library.models.Resource
 import com.openmrs.android_sdk.library.models.Visit
 import com.openmrs.android_sdk.library.models.VisitType
-import com.openmrs.android_sdk.library.models.Appointment
-import com.openmrs.android_sdk.library.models.Person
-import com.openmrs.android_sdk.library.models.ConceptClass
-import com.openmrs.android_sdk.library.models.Drug
-import com.openmrs.android_sdk.library.models.OrderGet
-import com.openmrs.android_sdk.library.models.ProgramGet
 import com.openmrs.android_sdk.utilities.ApplicationConstants
 import com.openmrs.android_sdk.utilities.DateUtils
 import com.openmrs.android_sdk.utilities.DateUtils.convertTime
@@ -311,7 +312,7 @@ object AppDatabaseHelper {
             patientEntity.person = Gson().toJson(patient.person)
         }
         if (patient.identifier != null) {
-            patientEntity.identifier = patient.identifier.identifier
+            patientEntity.identifier = parseAttributeValue(patient.identifier.display!!, "=")[1]
         } else {
             patientEntity.identifier = null
         }
@@ -432,6 +433,20 @@ object AppDatabaseHelper {
     fun <T> createObservableIO(func: Callable<T>?): Observable<T> {
         return Observable.fromCallable(func)
                 .subscribeOn(Schedulers.io())
+    }
+
+    private fun parseAttributeValue(givenValue: String, indicator: String?): java.util.ArrayList<String> {
+        val finalList = java.util.ArrayList<String>()
+        val charIndex = givenValue.indexOf(indicator!!)
+        if (charIndex != -1) {
+            val beforeChar = givenValue.substring(0, charIndex)
+            val afterChar = givenValue.substring(charIndex + 1).trim { it <= ' ' }
+            finalList.add(beforeChar)
+            finalList.add(afterChar)
+        } else {
+            Log.d("Parse attribute", "Character not found in string")
+        }
+        return finalList
     }
 
     fun convert(appointment: Appointment): AppointmentEntity {

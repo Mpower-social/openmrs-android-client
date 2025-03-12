@@ -184,8 +184,8 @@ class AddEditPatientFragment : BaseFragment(), onInputSelected {
                 is Result.Success -> if (result.operationType == PatientRegistering) {
                     hideLoading()
                     val ff = result.data
-                    ToastUtil.success("yesssss")
-//                    finishActivity()
+                    ToastUtil.success("Patient add successfully")
+                    finishActivity()
                 } else {
                     startPatientDashboardActivity()
 //                    finishActivity()

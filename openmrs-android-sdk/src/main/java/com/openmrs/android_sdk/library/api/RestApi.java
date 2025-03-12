@@ -66,6 +66,7 @@ import com.openmrs.android_sdk.library.models.VisitType;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -231,7 +232,7 @@ public interface RestApi {
 
     @Headers({"Content-Type: application/json"})
     @POST("custom-person/save")
-    Call<ResponseBody> savePatientDTO(@Body PatientSaveDTO patientSaveDTO);
+    Call<ResponseBody> savePatientDTO(@Body RequestBody patientSaveDTO);
 
     /**
      * Gets patients.
