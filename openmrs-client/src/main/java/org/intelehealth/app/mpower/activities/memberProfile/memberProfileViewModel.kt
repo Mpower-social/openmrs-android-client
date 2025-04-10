@@ -60,6 +60,10 @@ class MemberProfileViewModel @Inject constructor(
     private val _rxFormList = MutableLiveData<List<String>>()
     val rxFormList: LiveData<List<String>> get() = _rxFormList
 
+    fun initPatient(uuid: String) {
+        patient = patientDAO.findPatientByUUID(uuid)
+    }
+
     fun populateProfileData() {
         firstName = patient.person.names[0].givenName ?: ""
         lastName = patient.person.names[0].familyName ?: ""
@@ -87,9 +91,12 @@ class MemberProfileViewModel @Inject constructor(
     }
 
     fun populateServiceForm() {
-        if (rxMaritalStatus.value!! == ApplicationConstants.AttributeValues.MARRIED && age.toInt() > 15 && patient.person.gender == ApplicationConstants.GENDER.FEMALE){
-            val mList = encounterRepository.getLocalEncounterCreateByPatientUUID(patient.uuid!!).execute()
-            if(mList != null && mList.isNotEmpty()){
+        val mList = encounterRepository.getLocalEncounterCreateByPatientUUID(patient.uuid!!).execute()
+
+        if (rxMaritalStatus.value == ApplicationConstants.AttributeValues.MARRIED
+            && age.toInt() > 15
+            && patient.person.gender == ApplicationConstants.GENDER.FEMALE) {
+            if(!mList.isNullOrEmpty()){
                 var breakLoop = false
                 val eList = mList.reversed()
                 eList.forEach { ec ->
@@ -134,6 +141,10 @@ class MemberProfileViewModel @Inject constructor(
                     ApplicationConstants.FormListKeys.GENERAL_PATIENT_SERVICE
                 )
             }
+        } else {
+            _rxFormList.value = mutableListOf(
+                ApplicationConstants.FormListKeys.GENERAL_PATIENT_SERVICE
+            )
         }
     }
 

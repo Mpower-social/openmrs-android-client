@@ -1,0 +1,56 @@
+package com.openmrs.android_sdk.library.databases.entities
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.openmrs.android_sdk.library.models.Resource
+
+@Entity(tableName = "referred_patients")
+data class ReferredPatientEntity(
+  @ColumnInfo(name = "person"        ) var person: Int? = null,
+  @ColumnInfo(name = "personUuid"    ) var personUuid: String? = "",
+  @ColumnInfo(name = "gender"        ) var gender: String? = "",
+  @ColumnInfo(name = "birthdate"     ) var birthDate: Long? = 0,
+  @ColumnInfo(name = "firstName"     ) var firstName: String? = "",
+  @ColumnInfo(name = "lastName"      ) var lastName: String? = "",
+  @ColumnInfo(name = "identifier"    ) var identifier: String? = "",
+  @ColumnInfo(name = "nid"           ) var nid: String? = "",
+  @ColumnInfo(name = "brn"           ) var brn: String? = "",
+  @ColumnInfo(name = "epi"           ) var epi: String? = "",
+  @ColumnInfo(name = "mobile"        ) var mobile: String? = "",
+  @ColumnInfo(name = "motherName"    ) var motherName: String? = "",
+  @ColumnInfo(name = "shrId"         ) var shrId: String? = "",
+  @ColumnInfo(name = "highRisk"      ) var highRisk: Boolean? = false,
+  @ColumnInfo(name = "fatherName"    ) var fatherName: String? = "",
+  @ColumnInfo(name = "spouseName"    ) var spouseName: String? = "",
+  @ColumnInfo(name = "refered"       ) var referred: Boolean? = false,
+  @ColumnInfo(name = "location"      ) var location: String? = "",
+  @ColumnInfo(name = "country"       ) var countryName: String? = "",
+  @ColumnInfo(name = "division"      ) var divisionName: String? = "",
+  @ColumnInfo(name = "district"      ) var districtName: String? = "",
+  @ColumnInfo(name = "upazila"       ) var upazilaName: String? = "",
+  @ColumnInfo(name = "paurasava"     ) var paurashavaName: String? = "",
+  @ColumnInfo(name = "union"         ) var unionName: String? = "",
+  @ColumnInfo(name = "ward"          ) var wardName: String? = "",
+  @ColumnInfo(name = "block"         ) var blockName: String? = "",
+  @ColumnInfo(name = "occupation"    ) var occupation: String? = "",
+  @ColumnInfo(name = "relegion"      ) var religion: String? = "",
+  @ColumnInfo(name = "bloodGroup"    ) var bloodGroup: String? = "",
+  @ColumnInfo(name = "ethnicity"     ) var ethnicity: String? = "",
+  @ColumnInfo(name = "nationality"   ) var nationality: String? = "",
+  @ColumnInfo(name = "matritalStatus") var maritalStatus: String? = "",
+  @ColumnInfo(name = "countryId"     ) var countryId: String? = "",
+  @ColumnInfo(name = "divisionId"    ) var divisionId: String? = "",
+  @ColumnInfo(name = "districtId"    ) var districtId: String? = "",
+  @ColumnInfo(name = "upazilaId"     ) var upazilaId: String? = "",
+  @ColumnInfo(name = "paurasavaId"   ) var paurashavaId: String? = "",
+  @ColumnInfo(name = "unionId"       ) var unionId: String? = "",
+  @ColumnInfo(name = "wardId"        ) var wardId: String? = "",
+  @ColumnInfo(name = "blockId"       ) var blockId: String? = "",
+  @ColumnInfo(name = "referedDate"   ) var referredDate: String? = "",
+  @ColumnInfo(name = "lmp"           ) var lmp: String? = "",
+  @ColumnInfo(name = "status"        ) var status: String? = "",
+  @ColumnInfo(name = "serverVersion" ) var serverVersion: Long? = 0,
+  @ColumnInfo(name = "uuid"          ) var uuid: String? = "",
+  @PrimaryKey @ColumnInfo(name = "id") var id: Int? = null,
+)

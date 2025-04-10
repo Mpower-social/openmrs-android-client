@@ -305,6 +305,7 @@ object ApplicationConstants {
         const val USER_UUID = "userUUID"
         const val LOGIN = "login"
         const val FIRST_TIME = "firstTime"
+        const val USER_LOCATIONS = "userLocations"
     }
 
     object DialogTAG {

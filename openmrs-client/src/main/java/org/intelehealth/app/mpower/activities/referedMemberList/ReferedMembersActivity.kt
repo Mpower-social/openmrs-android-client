@@ -77,7 +77,7 @@ class ReferedMembersActivity : ACBaseActivity(), View.OnClickListener {
             override fun onQueryTextChange(query: String): Boolean {
                 val memberListFragment = supportFragmentManager.findFragmentById(R.id.referedMembersContentFrame) as ReferedMembersFragment?
                 if(NetworkUtils.isOnline()){
-                    memberListFragment?.fetchReferredMembersOnRefresh(query)
+                    memberListFragment?.fetchReferredMembersOnRefresh()
                 } else {
                     memberListFragment?.fetchMembers(query)
                 }

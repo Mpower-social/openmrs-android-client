@@ -36,6 +36,7 @@ import com.openmrs.android_sdk.library.dao.PatientRoomDAO;
 import com.openmrs.android_sdk.library.dao.ProductDAO;
 import com.openmrs.android_sdk.library.dao.ProgramRoomDAO;
 import com.openmrs.android_sdk.library.dao.ProviderRoomDAO;
+import com.openmrs.android_sdk.library.dao.ReferredPatientDAO;
 import com.openmrs.android_sdk.library.dao.StockDAO;
 import com.openmrs.android_sdk.library.dao.StockDashboardDAO;
 import com.openmrs.android_sdk.library.dao.VisitRoomDAO;
@@ -51,6 +52,7 @@ import com.openmrs.android_sdk.library.databases.entities.OrderEntity;
 import com.openmrs.android_sdk.library.databases.entities.PatientEntity;
 import com.openmrs.android_sdk.library.databases.entities.ProductModelEntity;
 import com.openmrs.android_sdk.library.databases.entities.ProgramEntity;
+import com.openmrs.android_sdk.library.databases.entities.ReferredPatientEntity;
 import com.openmrs.android_sdk.library.databases.entities.StandaloneEncounterEntity;
 import com.openmrs.android_sdk.library.databases.entities.StandaloneObservationEntity;
 import com.openmrs.android_sdk.library.databases.entities.StockDashboardModelEntity;
@@ -83,7 +85,9 @@ import com.openmrs.android_sdk.utilities.ApplicationConstants;
         StockListModelEntity.class,
         StockDashboardModelEntity.class,
         ProductModelEntity.class,
-        DrugEntity.class},
+        DrugEntity.class,
+        ReferredPatientEntity.class,
+        },
         version = 1)
 @TypeConverters({StringListConverter.class, WorkflowConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
@@ -220,4 +224,11 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract StockDAO stockDAO();
 
     public abstract StockDashboardDAO stockDashboardDAO();
+
+    /**
+     * Referred Patient dao.
+     *
+     * @return the ReferredPatient from room
+     */
+    public abstract ReferredPatientDAO referredPatientDAO();
 }

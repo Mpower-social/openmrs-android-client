@@ -1,5 +1,6 @@
 package com.openmrs.android_sdk.library.models
 
+import androidx.room.ColumnInfo
 import com.google.gson.annotations.SerializedName
 
 data class ReferredPatientResponse(
@@ -50,6 +51,8 @@ data class ReferredPatient (
     @SerializedName("unionId"        ) var unionId        : String?  = null,
     @SerializedName("wardId"         ) var wardId         : String?  = null,
     @SerializedName("blockId"        ) var blockId        : String?  = null,
-    @SerializedName("referedDate"    ) var referedDate    : String?  = null
-
+    @SerializedName("referedDate"    ) var referedDate    : String?  = null,
+    @SerializedName("lmp"            ) var lmp            : String?  = null,
+    @SerializedName("status"         ) var status         : String?  = null,
+    @SerializedName("serverVersion"  ) var serverVersion  : Long?    = 0,
 )

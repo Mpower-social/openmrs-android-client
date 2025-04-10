@@ -34,8 +34,10 @@ class MemberProfileActivity : ACBaseActivity(), View.OnClickListener {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_member_profile)
         mBinding.viewModel = mViewModel
 
-        val patientString = this.intent.getStringExtra(ApplicationConstants.BundleKeys.PATIENT_ENTITY)
-        mViewModel.patient = Gson().fromJson(patientString, Patient::class.java)
+        val patientUuid = this.intent.getStringExtra(ApplicationConstants.BundleKeys.PATIENT_UUID)
+        patientUuid?.let {
+            mViewModel.initPatient(patientUuid)
+        }
 
         observeData()
         initViewPager()

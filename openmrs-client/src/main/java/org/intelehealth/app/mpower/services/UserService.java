@@ -16,6 +16,8 @@ package org.intelehealth.app.mpower.services;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +28,13 @@ import retrofit2.Response;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.openmrs.android_sdk.library.OpenmrsAndroid;
 import com.openmrs.android_sdk.library.api.RestApi;
 import com.openmrs.android_sdk.library.models.Results;
 import com.openmrs.android_sdk.library.models.User;
+import com.openmrs.android_sdk.library.models.UserLocation;
 import com.openmrs.android_sdk.utilities.ApplicationConstants;
 import com.openmrs.android_sdk.utilities.ToastUtil;
 
@@ -55,6 +60,7 @@ public class UserService {
                             if (user.getDisplay().toUpperCase().equals(username.toUpperCase())) {
                                 matchFound = true;
                                 fetchFullUserInformation(user.getUuid());
+                                fetchUserLocationInformation(user.getId());
                             }
                         }
                         if (!matchFound) {
@@ -91,6 +97,26 @@ public class UserService {
 
             @Override
             public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                ToastUtil.error(t.getMessage());
+            }
+        });
+    }
+
+    private void fetchUserLocationInformation(Long userId) {
+        Call<List<UserLocation>> call = restApi.findUserLocations(userId);
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<UserLocation>> call, @NonNull Response<List<UserLocation>> response) {
+                if (response.isSuccessful()) {
+                    String userLocations = new Gson().toJson(response.body(), new TypeToken<ArrayList<UserLocation>>(){}.getType());
+                    OpenmrsAndroid.setUserLocationInformation(userLocations);
+                } else {
+                    ToastUtil.error(response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<UserLocation>> call, @NonNull Throwable t) {
                 ToastUtil.error(t.getMessage());
             }
         });

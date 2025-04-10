@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.openmrs.android_sdk.library.models.Patient
+import com.openmrs.android_sdk.library.models.ReferredPatient
 import dagger.hilt.android.AndroidEntryPoint
 import org.intelehealth.app.mpower.activities.BaseFragment
 import com.openmrs.android_sdk.library.models.Result
@@ -60,7 +61,7 @@ class ReferedMembersFragment : BaseFragment() {
             fetchMembers()
 
             memberSwipeLayout.setOnRefreshListener {
-                fetchReferredMembersOnRefresh("")
+                fetchReferredMembersOnRefresh()
                 memberSwipeLayout.isRefreshing = false
             }
         }
@@ -81,8 +82,8 @@ class ReferedMembersFragment : BaseFragment() {
         viewModel.fetchMembers()
     }
 
-    fun fetchReferredMembersOnRefresh(query: String) {
-        viewModel.fetchReferredMembersOnRefresh(query)
+    fun fetchReferredMembersOnRefresh() {
+        viewModel.fetchReferredMembersOnRefresh()
     }
 
     fun fetchMembers(query: String) {
@@ -96,7 +97,7 @@ class ReferedMembersFragment : BaseFragment() {
         }
     }
 
-    private fun showMemberList(patients: List<Patient>) {
+    private fun showMemberList(patients: List<ReferredPatient>) {
         with(binding) {
             memberListProgressBar.makeGone()
             if (patients.isEmpty()) {

@@ -193,8 +193,7 @@ public class SyncedPatientsRecyclerViewAdapter extends RecyclerView.Adapter<Sync
                 if (!multiSelect) {
                     Intent intent = new Intent(mContext.getActivity(), MemberProfileActivity.class);
                     try{
-                        String personObj = new Gson().toJson(value);
-                        intent.putExtra(ApplicationConstants.BundleKeys.PATIENT_ENTITY, personObj);
+                        intent.putExtra(ApplicationConstants.BundleKeys.PATIENT_UUID, value.getUuid());
                     } catch (Exception e) {
                         Log.d("", e.toString());
                     }

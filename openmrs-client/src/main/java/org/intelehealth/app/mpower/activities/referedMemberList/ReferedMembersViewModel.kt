@@ -1,83 +1,79 @@
 package org.intelehealth.app.mpower.activities.referedMemberList
 
-import com.openmrs.android_sdk.library.api.repository.PatientRepository
-import com.openmrs.android_sdk.library.dao.PatientDAO
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.openmrs.android_sdk.library.OpenmrsAndroid
+import com.openmrs.android_sdk.library.api.repository.ReferredPatientRepository
 import com.openmrs.android_sdk.library.models.OperationType
-import com.openmrs.android_sdk.library.models.Patient
 import com.openmrs.android_sdk.library.models.ReferredPatient
+import com.openmrs.android_sdk.library.models.UserLocation
 import com.openmrs.android_sdk.utilities.NetworkUtils
-import com.openmrs.android_sdk.utilities.ToastUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import org.intelehealth.app.mpower.activities.BaseViewModel
 import org.intelehealth.app.mpower.listeners.ItemClickListener
-import org.intelehealth.app.mpower.utilities.FilterUtil
 import rx.android.schedulers.AndroidSchedulers
 
 import javax.inject.Inject
 
 
 @HiltViewModel
-class ReferedMembersViewModel @Inject constructor(private val patientDAO: PatientDAO, private val patientRepository: PatientRepository) : BaseViewModel<List<Patient>>(),
+class ReferedMembersViewModel @Inject constructor(private val patientRepository: ReferredPatientRepository) : BaseViewModel<List<ReferredPatient>>(),
     ItemClickListener {
+
+    private val subscriptions = CompositeDisposable()
 
     fun fetchMembers() {
         setLoading()
-        addSubscription(patientDAO.allPatients
+        addSubscription(patientRepository.getAllPatients()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { patients: List<Patient> -> setContent(patients) },
+                { setContent(it) },
                 { setError(it, OperationType.MemberFetching) }
             ))
     }
 
     fun fetchMembers(query: String) {
         setLoading()
-        addSubscription(patientDAO.allPatients
+        addSubscription(patientRepository.findPatientByQuery(query)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { patients: List<Patient> ->
-                    val filteredPatients = FilterUtil.getPatientsFilteredByQuery(patients, query)
-                    setContent(filteredPatients)
-                },
+                { setContent(it) },
                 { setError(it, OperationType.MemberSearching) }
             ))
     }
 
-    fun fetchReferredMembersOnRefresh(query: String) {
+    fun fetchReferredMembersOnRefresh() {
         if (NetworkUtils.isOnline()) {
             setLoading()
-            addSubscription(patientRepository.findReferredPatients(query)
-                .observeOn(AndroidSchedulers.mainThread())
+            subscriptions.add( io.reactivex.Observable.fromIterable(getUserLocations())
+                .flatMap { location ->
+                    return@flatMap io.reactivex.Observable.just(patientRepository.fetchPatientsFromServerAndGetAll(wardId = location.wardId!!, 0))
+                }
+                .toList()
+                .subscribeOn(Schedulers.io())
                 .subscribe(
-                    { patients: List<ReferredPatient> ->
-//                        insertServerMembers(patients)
-//                        setContent(patients)
-                    },
-                    { setError(it, OperationType.MemberFetching) }
+                    { setContent(it.flatten()) },
+                    { setError(it, OperationType.MemberFetching) },
                 )
             )
         }
     }
 
-    fun insertServerMembers(patients: List<Patient>) {
-        for (patient in patients) {
-            if(patient.uuid != null){
-                val isSaved = patientDAO.isUserAlreadySaved(patient.uuid!!)
-                if(!isSaved){
-                    try {
-                        addSubscription(patientDAO.savePatient(patient)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe())
-                    } catch (e: Error){
-                        ToastUtil.error(e.toString())
-                    }
-                }
-            }
-        }
+    override fun onCleared() {
+        super.onCleared()
+        subscriptions.clear()
     }
 
     override fun onItemClicked(item: Any?) {
 
     }
 
+    private fun getUserLocations(): List<UserLocation> {
+        return listOf(UserLocation(wardId = 52640))
+        /*return OpenmrsAndroid.getUserLocationInformation().let { locations ->
+            Gson().fromJson(locations, object : TypeToken<List<UserLocation>>() {}.type)
+        }*/
+    }
 }

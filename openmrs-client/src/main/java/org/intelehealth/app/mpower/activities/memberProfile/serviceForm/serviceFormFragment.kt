@@ -54,6 +54,8 @@ class ServiceFormFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         setupObserver()
         fetchMembers()
+
+        mViewModel.populateServiceForm()
     }
 
     private fun setupObserver() {

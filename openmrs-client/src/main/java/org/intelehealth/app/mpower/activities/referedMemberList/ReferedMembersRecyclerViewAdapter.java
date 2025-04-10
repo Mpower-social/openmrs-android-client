@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.openmrs.android_sdk.library.models.Patient;
+import com.openmrs.android_sdk.library.models.ReferredPatient;
 import com.openmrs.android_sdk.utilities.ApplicationConstants;
 
 import org.intelehealth.app.mpower.R;
@@ -41,15 +42,15 @@ import java.util.List;
 
 public class ReferedMembersRecyclerViewAdapter extends RecyclerView.Adapter<ReferedMembersRecyclerViewAdapter.PatientViewHolder> {
     private ReferedMembersFragment mContext;
-    private List<Patient> mItems;
-    private ArrayList<Patient> selectedItems = new ArrayList<>();
+    private List<ReferredPatient> mItems;
+    private ArrayList<ReferredPatient> selectedItems = new ArrayList<>();
 
-    public ReferedMembersRecyclerViewAdapter(ReferedMembersFragment context, List<Patient> items) {
+    public ReferedMembersRecyclerViewAdapter(ReferedMembersFragment context, List<ReferredPatient> items) {
         this.mContext = context;
         this.mItems = items;
     }
 
-    public void updateList(List<Patient> patientList) {
+    public void updateList(List<ReferredPatient> patientList) {
         this.mItems = patientList;
         this.selectedItems = new ArrayList();
         notifyDataSetChanged();
@@ -66,35 +67,32 @@ public class ReferedMembersRecyclerViewAdapter extends RecyclerView.Adapter<Refe
     public void onBindViewHolder(@NonNull ReferedMembersRecyclerViewAdapter.PatientViewHolder holder, final int position) {
         holder.update(mItems.get(position));
 
-        final Patient patient = mItems.get(position);
+        final ReferredPatient patient = mItems.get(position);
 
         if (null != patient.getIdentifier()) {
             String patientIdentifier = String.format(mContext.getResources().getString(R.string.patient_identifier),
-                    patient.getIdentifier().getIdentifier());
+                    patient.getIdentifier());
             holder.mIdentifier.setText(patientIdentifier);
         }
-        if (null != patient.getName()) {
-            holder.mDisplayName.setText(patient.getPerson().getDisplay());
+        if (null != patient.getFirstName()) {
+            holder.mDisplayName.setText(patient.getFirstName() + " " + patient.getLastName());
         }
         if (null != patient.getGender()) {
-            if (patient.getPhoto() != null) {
-                holder.mGender.setImageBitmap(patient.getPhoto());
-            } else {
                 if (patient.getGender().equals(ApplicationConstants.MALE)) {
                     holder.mGender.setImageResource(R.drawable.patient_male);
                 } else {
                     holder.mGender.setImageResource(R.drawable.patient_female);
                 }
-            }
+
         } else {
             holder.mGender.setImageResource(R.drawable.patient_male);
         }
         /*if (patient.isDeceased() != null && patient.isDeceased()) {
             holder.mRowLayout.setCardBackgroundColor(mContext.getResources().getColor(R.color.deceased_green));
-        }*/
+        }
         if (patient.isDeceased() != null && patient.isDeceased()) {
             holder.mRowLayout.setCardBackgroundColor(mContext.getResources().getColor(R.color.deceased_green));
-        }
+        }*/
     }
 
     @Override
@@ -119,12 +117,11 @@ public class ReferedMembersRecyclerViewAdapter extends RecyclerView.Adapter<Refe
             isRisk = itemView.findViewById(R.id.referedPatientWithRisk);
         }
 
-        void update(final Patient value) {
+        void update(final ReferredPatient value) {
             itemView.setOnClickListener(view -> {
                 Intent intent = new Intent(mContext.getActivity(), MemberProfileActivity.class);
                 try{
-                    String personObj = new Gson().toJson(value);
-                    intent.putExtra(ApplicationConstants.BundleKeys.PATIENT_ENTITY, personObj);
+                    intent.putExtra(ApplicationConstants.BundleKeys.PATIENT_UUID, value.getUuid());
                 } catch (Exception e) {
                     Log.d("", e.toString());
                 }

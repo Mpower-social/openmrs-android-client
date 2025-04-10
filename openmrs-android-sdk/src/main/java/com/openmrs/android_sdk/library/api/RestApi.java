@@ -46,10 +46,12 @@ import com.openmrs.android_sdk.library.models.PatientDto;
 import com.openmrs.android_sdk.library.models.PatientDtoUpdate;
 import com.openmrs.android_sdk.library.models.PatientPhoto;
 import com.openmrs.android_sdk.library.models.PatientSaveDTO;
+import com.openmrs.android_sdk.library.models.Person;
 import com.openmrs.android_sdk.library.models.ProgramCreate;
 import com.openmrs.android_sdk.library.models.ProgramGet;
 import com.openmrs.android_sdk.library.models.Provider;
 import com.openmrs.android_sdk.library.models.RTCToken;
+import com.openmrs.android_sdk.library.models.ReferredPatientResponse;
 import com.openmrs.android_sdk.library.models.Resource;
 import com.openmrs.android_sdk.library.models.Results;
 import com.openmrs.android_sdk.library.models.SearchRequest;
@@ -60,6 +62,7 @@ import com.openmrs.android_sdk.library.models.SystemSetting;
 import com.openmrs.android_sdk.library.models.TextBody;
 import com.openmrs.android_sdk.library.models.TimeSlot;
 import com.openmrs.android_sdk.library.models.User;
+import com.openmrs.android_sdk.library.models.UserLocation;
 import com.openmrs.android_sdk.library.models.Visit;
 import com.openmrs.android_sdk.library.models.VisitType;
 
@@ -233,6 +236,15 @@ public interface RestApi {
     @Headers({"Content-Type: application/json"})
     @POST("custom-person/save")
     Call<ResponseBody> savePatientDTO(@Body RequestBody patientSaveDTO);
+
+    @Headers({"Content-Type: application/json"})
+    @GET("custom-person/user-location")
+    Call<List<UserLocation>> findUserLocations(@Query("userId") Long userId);
+
+    @Headers({"Content-Type: application/json"})
+    @GET("custom-person/sync")
+    Call<ResponseBody> findPersonsByLocation(@Query("wardId") Long wardId,
+                                                        @Query("serverVersion") Long serverVersion);
 
     /**
      * Gets patients.

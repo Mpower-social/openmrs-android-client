@@ -14,9 +14,13 @@ import javax.inject.Singleton;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import android.util.Base64;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.chuckerteam.chucker.api.ChuckerInterceptor;
 import com.google.gson.Gson;
@@ -38,6 +42,11 @@ public class RestServiceBuilder {
     private static Retrofit.Builder builder;
 
     static {
+        HttpLoggingInterceptor.Logger logger = s -> {
+            Log.v("TEST_LOG", s);
+        };
+        httpClient.addInterceptor(new HttpLoggingInterceptor(logger));
+
         builder =
                 new Retrofit.Builder()
                         .baseUrl(API_BASE_URL)

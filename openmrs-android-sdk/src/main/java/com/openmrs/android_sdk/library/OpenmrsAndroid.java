@@ -420,6 +420,27 @@ public class OpenmrsAndroid {
     }
 
     /**
+     * Sets current user location information.
+     *
+     * @param locationInformation the user location information
+     */
+    public static void setUserLocationInformation(String locationInformation) {
+        SharedPreferences.Editor editor = getOpenMRSSharedPreferences().edit();
+        editor.putString(ApplicationConstants.UserKeys.USER_LOCATIONS, locationInformation);
+        editor.apply();
+    }
+
+    /**
+     * Gets current user location info.
+     *
+     * @return the current user location info
+     */
+    public static String getUserLocationInformation() {
+        SharedPreferences prefs = getOpenMRSSharedPreferences();
+        return prefs.getString(ApplicationConstants.UserKeys.USER_LOCATIONS, ApplicationConstants.EMPTY_STRING);
+    }
+
+    /**
      * Gets current logged in user info.
      *
      * @return the current logged in user info

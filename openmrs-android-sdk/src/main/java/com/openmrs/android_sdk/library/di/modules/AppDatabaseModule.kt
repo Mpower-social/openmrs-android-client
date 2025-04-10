@@ -5,6 +5,7 @@ import com.openmrs.android_sdk.library.dao.AllergyRoomDAO
 import com.openmrs.android_sdk.library.dao.AppointmentRoomDAO
 import com.openmrs.android_sdk.library.dao.ConceptRoomDAO
 import com.openmrs.android_sdk.library.dao.ProviderRoomDAO
+import com.openmrs.android_sdk.library.dao.ReferredPatientDAO
 import com.openmrs.android_sdk.library.dao.StockDAO
 import com.openmrs.android_sdk.library.dao.StockDashboardDAO
 import com.openmrs.android_sdk.library.databases.AppDatabase
@@ -52,6 +53,11 @@ object AppDatabaseModule {
     @Singleton
     fun provideStockDashboardDAO(@ApplicationContext context: Context): StockDashboardDAO =
         AppDatabase.getDatabase(context).stockDashboardDAO()
+
+    @Provides
+    @Singleton
+    fun provideReferredPatientDAO(@ApplicationContext context: Context): ReferredPatientDAO =
+        AppDatabase.getDatabase(context).referredPatientDAO()
 }
 
 

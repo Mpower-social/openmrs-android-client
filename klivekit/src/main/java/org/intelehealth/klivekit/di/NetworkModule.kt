@@ -42,9 +42,14 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    fun provideHttpLoggingInterceptor() = HttpLoggingInterceptor().apply {
-        level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
-        else HttpLoggingInterceptor.Level.NONE
+    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
+        val logger = HttpLoggingInterceptor.Logger {
+            it
+        }
+        return HttpLoggingInterceptor(logger).apply {
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+            else HttpLoggingInterceptor.Level.NONE
+        }
     }
 
     @Singleton

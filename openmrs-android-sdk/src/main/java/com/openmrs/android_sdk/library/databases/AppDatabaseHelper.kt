@@ -40,6 +40,7 @@ import com.openmrs.android_sdk.library.databases.entities.ObservationEntity
 import com.openmrs.android_sdk.library.databases.entities.OrderEntity
 import com.openmrs.android_sdk.library.databases.entities.PatientEntity
 import com.openmrs.android_sdk.library.databases.entities.ProgramEntity
+import com.openmrs.android_sdk.library.databases.entities.ReferredPatientEntity
 import com.openmrs.android_sdk.library.databases.entities.StandaloneEncounterEntity
 import com.openmrs.android_sdk.library.databases.entities.StandaloneObservationEntity
 import com.openmrs.android_sdk.library.databases.entities.TimeSlotEntity
@@ -60,6 +61,7 @@ import com.openmrs.android_sdk.library.models.Person
 import com.openmrs.android_sdk.library.models.PersonAddress
 import com.openmrs.android_sdk.library.models.PersonName
 import com.openmrs.android_sdk.library.models.ProgramGet
+import com.openmrs.android_sdk.library.models.ReferredPatient
 import com.openmrs.android_sdk.library.models.Resource
 import com.openmrs.android_sdk.library.models.Visit
 import com.openmrs.android_sdk.library.models.VisitType
@@ -312,7 +314,7 @@ object AppDatabaseHelper {
             patientEntity.person = Gson().toJson(patient.person)
         }
         if (patient.identifier != null) {
-            patientEntity.identifier = parseAttributeValue(patient.identifier.display!!, "=")[1]
+            patientEntity.identifier = patient.identifier.identifier
         } else {
             patientEntity.identifier = null
         }
@@ -349,6 +351,114 @@ object AppDatabaseHelper {
         }
         patientEntity.encounters = patient.encounters
         patientEntity.deceased = if(patient.isDeceased != null) patient.isDeceased.toString() else ""
+        return patientEntity
+    }
+
+    @JvmStatic
+    fun convert(patient: ReferredPatient): ReferredPatientEntity {
+        val patientEntity = ReferredPatientEntity()
+        patientEntity.id = patient.id
+        patientEntity.uuid = patient.uuid
+        patientEntity.person = patient.person
+        patientEntity.personUuid = patient.personUuid
+        patientEntity.identifier = patient.identifier
+        patientEntity.gender = patient.gender
+        patientEntity.firstName = patient.firstName
+        patientEntity.lastName = patient.lastName
+        patientEntity.gender = patient.gender
+        patientEntity.gender = patient.gender
+        patientEntity.nid = patient.nid
+        patientEntity.brn = patient.brn
+        patientEntity.epi = patient.epi
+        patientEntity.mobile = patient.mobile
+        patientEntity.motherName = patient.motherName
+        patientEntity.shrId = patient.shrId
+        patientEntity.highRisk = patient.highRisk
+        patientEntity.fatherName = patient.fatherName
+        patientEntity.spouseName = patient.spouseName
+        patientEntity.referred = patient.refered
+        patientEntity.referredDate = patient.referedDate
+        patientEntity.location = patient.location
+        patientEntity.countryName = patient.country
+        patientEntity.divisionName = patient.division
+        patientEntity.districtName = patient.district
+        patientEntity.upazilaName = patient.upazila
+        patientEntity.paurashavaName = patient.paurasava
+        patientEntity.unionName = patient.union
+        patientEntity.wardName = patient.ward
+        patientEntity.blockName = patient.block
+        patientEntity.occupation = patient.occupation
+        patientEntity.religion = patient.relegion
+        patientEntity.bloodGroup = patient.bloodGroup
+        patientEntity.ethnicity = patient.ethnicity
+        patientEntity.nationality = patient.nationality
+        patientEntity.maritalStatus = patient.matritalStatus
+        patientEntity.countryId = patient.countryId
+        patientEntity.divisionId = patient.divisionId
+        patientEntity.districtId = patient.districtId
+        patientEntity.upazilaId = patient.upazilaId
+        patientEntity.paurashavaId = patient.paurasavaId
+        patientEntity.unionId = patient.unionId
+        patientEntity.wardId = patient.wardId
+        patientEntity.blockId = patient.blockId
+        patientEntity.lmp = patient.lmp
+        patientEntity.status = patient.status
+        patientEntity.serverVersion = patient.serverVersion
+
+        return patientEntity
+    }
+
+    @JvmStatic
+    fun convert(patient: ReferredPatientEntity): ReferredPatient {
+        val patientEntity = ReferredPatient()
+        patientEntity.id = patient.id
+        patientEntity.uuid = patient.uuid
+        patientEntity.person = patient.person
+        patientEntity.personUuid = patient.personUuid
+        patientEntity.identifier = patient.identifier
+        patientEntity.gender = patient.gender
+        patientEntity.firstName = patient.firstName
+        patientEntity.lastName = patient.lastName
+        patientEntity.gender = patient.gender
+        patientEntity.gender = patient.gender
+        patientEntity.nid = patient.nid
+        patientEntity.brn = patient.brn
+        patientEntity.epi = patient.epi
+        patientEntity.mobile = patient.mobile
+        patientEntity.motherName = patient.motherName
+        patientEntity.shrId = patient.shrId
+        patientEntity.highRisk = patient.highRisk
+        patientEntity.fatherName = patient.fatherName
+        patientEntity.spouseName = patient.spouseName
+        patientEntity.refered = patient.referred
+        patientEntity.referedDate = patient.referredDate
+        patientEntity.location = patient.location
+        patientEntity.country = patient.countryName
+        patientEntity.division = patient.divisionName
+        patientEntity.district = patient.districtName
+        patientEntity.upazila = patient.upazilaName
+        patientEntity.paurasava = patient.paurashavaName
+        patientEntity.union = patient.unionName
+        patientEntity.ward = patient.wardName
+        patientEntity.block = patient.blockName
+        patientEntity.occupation = patient.occupation
+        patientEntity.relegion = patient.religion
+        patientEntity.bloodGroup = patient.bloodGroup
+        patientEntity.ethnicity = patient.ethnicity
+        patientEntity.nationality = patient.nationality
+        patientEntity.matritalStatus = patient.maritalStatus
+        patientEntity.countryId = patient.countryId
+        patientEntity.divisionId = patient.divisionId
+        patientEntity.districtId = patient.districtId
+        patientEntity.upazilaId = patient.upazilaId
+        patientEntity.paurasavaId = patient.paurashavaId
+        patientEntity.unionId = patient.unionId
+        patientEntity.wardId = patient.wardId
+        patientEntity.blockId = patient.blockId
+        patientEntity.lmp = patient.lmp
+        patientEntity.status = patient.status
+        patientEntity.serverVersion = patient.serverVersion
+
         return patientEntity
     }
 
