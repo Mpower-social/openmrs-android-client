@@ -284,6 +284,9 @@ object AppDatabaseHelper {
         personName.familyName = patientEntity.familyName
         patient.names.add(personName)
         patient.gender = patientEntity.gender
+        patient.relegion = patientEntity.relegion
+        patient.matritalStatus = patientEntity.matritalStatus
+        patient.bloodGroup = patientEntity.bloodGroup
         patient.birthdate = patientEntity.birthDate
         val photoByteArray = patientEntity.photo
         if (photoByteArray != null) {
@@ -324,6 +327,63 @@ object AppDatabaseHelper {
             patientEntity.familyName = if(patient.name.familyName != null) patient.name.familyName else ""
         }
         patientEntity.gender = patient.gender
+        patientEntity.relegion = patient.relegion
+        patientEntity.bloodGroup = patient.bloodGroup
+        patientEntity.matritalStatus = patient.matritalStatus
+        patientEntity.birthDate = patient.birthdate
+        patientEntity.deathDate = null
+        if (null != patient.causeOfDeath) {
+            if (patient.causeOfDeath.display == null) {
+                patientEntity.causeOfDeath = null
+            } else {
+                patientEntity.causeOfDeath = patient.causeOfDeath.display
+            }
+        } else {
+            patientEntity.causeOfDeath = null
+        }
+        patientEntity.age = null
+        if (patient.photo != null) {
+            patientEntity.photo = bitmapToByteArray(patient.photo)
+        } else {
+            patientEntity.photo = null
+        }
+        if (null != patient.address) {
+            patientEntity.address_1 = patient.address.address1
+            patientEntity.address_2 = patient.address.address2
+            patientEntity.postalCode = patient.address.postalCode
+            patientEntity.country = patient.address.country
+            patientEntity.state = patient.address.stateProvince
+            patientEntity.city = patient.address.cityVillage
+        }
+        patientEntity.encounters = patient.encounters
+        patientEntity.deceased = if(patient.isDeceased != null) patient.isDeceased.toString() else ""
+        return patientEntity
+    }
+
+    @JvmStatic
+    fun convertUpdate(patient: Patient): PatientEntity {
+        val patientEntity = PatientEntity()
+        patientEntity.display = patient.display
+        patientEntity.uuid = patient.uuid
+        patientEntity.isSynced = patient.isSynced
+        if(patient.person != null){
+            patientEntity.person = Gson().toJson(patient.person)
+        }
+        if (patient.identifier != null) {
+            val id = patient.identifier.display?.let { parseAttributeValue(it,"=") }
+            patientEntity.identifier = id?.get(1) ?: ""
+        } else {
+            patientEntity.identifier = null
+        }
+        if(patient.name != null){
+            patientEntity.givenName = if(patient.name.givenName != null) patient.name.givenName else ""
+            patientEntity.middleName = if(patient.name.middleName != null) patient.name.middleName else ""
+            patientEntity.familyName = if(patient.name.familyName != null) patient.name.familyName else ""
+        }
+        patientEntity.gender = patient.gender
+        patientEntity.relegion = patient.relegion
+        patientEntity.bloodGroup = patient.bloodGroup
+        patientEntity.matritalStatus = patient.matritalStatus
         patientEntity.birthDate = patient.birthdate
         patientEntity.deathDate = null
         if (null != patient.causeOfDeath) {

@@ -68,6 +68,12 @@ public class PatientDAO {
         return patientRoomDAO.updatePatient(entity) > 0;
     }
 
+    public boolean updatePatientAfterSaveOnline(long patientID, Patient patient) {
+        PatientEntity entity = AppDatabaseHelper.convertUpdate(patient);
+        entity.setId(patientID);
+        return patientRoomDAO.updatePatient(entity) > 0;
+    }
+
     /**
      * Delete patient.
      *

@@ -23,13 +23,16 @@ import androidx.room.TypeConverters;
 
 import com.openmrs.android_sdk.library.dao.AllergyRoomDAO;
 import com.openmrs.android_sdk.library.dao.AppointmentRoomDAO;
+import com.openmrs.android_sdk.library.dao.BloodGroupDAO;
 import com.openmrs.android_sdk.library.dao.ConceptRoomDAO;
 import com.openmrs.android_sdk.library.dao.DrugRoomDAO;
 import com.openmrs.android_sdk.library.dao.EncounterCreateRoomDAO;
 import com.openmrs.android_sdk.library.dao.EncounterRoomDAO;
 import com.openmrs.android_sdk.library.dao.EncounterTypeRoomDAO;
 import com.openmrs.android_sdk.library.dao.FormResourceDAO;
+import com.openmrs.android_sdk.library.dao.GlobalLocationDAO;
 import com.openmrs.android_sdk.library.dao.LocationRoomDAO;
+import com.openmrs.android_sdk.library.dao.MaritalStatusDAO;
 import com.openmrs.android_sdk.library.dao.ObservationRoomDAO;
 import com.openmrs.android_sdk.library.dao.OrderRoomDAO;
 import com.openmrs.android_sdk.library.dao.PatientRoomDAO;
@@ -37,22 +40,27 @@ import com.openmrs.android_sdk.library.dao.ProductDAO;
 import com.openmrs.android_sdk.library.dao.ProgramRoomDAO;
 import com.openmrs.android_sdk.library.dao.ProviderRoomDAO;
 import com.openmrs.android_sdk.library.dao.ReferredPatientDAO;
+import com.openmrs.android_sdk.library.dao.ReligionDAO;
 import com.openmrs.android_sdk.library.dao.StockDAO;
 import com.openmrs.android_sdk.library.dao.StockDashboardDAO;
 import com.openmrs.android_sdk.library.dao.VisitRoomDAO;
 import com.openmrs.android_sdk.library.databases.entities.AllergyEntity;
 import com.openmrs.android_sdk.library.databases.entities.AppointmentEntity;
+import com.openmrs.android_sdk.library.databases.entities.BloodGroupEntity;
 import com.openmrs.android_sdk.library.databases.entities.ConceptEntity;
 import com.openmrs.android_sdk.library.databases.entities.DrugEntity;
 import com.openmrs.android_sdk.library.databases.entities.EncounterEntity;
 import com.openmrs.android_sdk.library.databases.entities.FormResourceEntity;
+import com.openmrs.android_sdk.library.databases.entities.GlobalLocationEntity;
 import com.openmrs.android_sdk.library.databases.entities.LocationEntity;
+import com.openmrs.android_sdk.library.databases.entities.MaritalStatusEntity;
 import com.openmrs.android_sdk.library.databases.entities.ObservationEntity;
 import com.openmrs.android_sdk.library.databases.entities.OrderEntity;
 import com.openmrs.android_sdk.library.databases.entities.PatientEntity;
 import com.openmrs.android_sdk.library.databases.entities.ProductModelEntity;
 import com.openmrs.android_sdk.library.databases.entities.ProgramEntity;
 import com.openmrs.android_sdk.library.databases.entities.ReferredPatientEntity;
+import com.openmrs.android_sdk.library.databases.entities.ReligionEntity;
 import com.openmrs.android_sdk.library.databases.entities.StandaloneEncounterEntity;
 import com.openmrs.android_sdk.library.databases.entities.StandaloneObservationEntity;
 import com.openmrs.android_sdk.library.databases.entities.StockDashboardModelEntity;
@@ -85,6 +93,10 @@ import com.openmrs.android_sdk.utilities.ApplicationConstants;
         StockListModelEntity.class,
         StockDashboardModelEntity.class,
         ProductModelEntity.class,
+        GlobalLocationEntity.class,
+        BloodGroupEntity.class,
+        MaritalStatusEntity.class,
+        ReligionEntity.class,
         DrugEntity.class,
         ReferredPatientEntity.class,
         },
@@ -137,6 +149,12 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract PatientRoomDAO patientRoomDAO();
 
     public abstract ProductDAO productRoomDAO();
+
+    public abstract GlobalLocationDAO globalLocationRoomDAO();
+
+    public abstract BloodGroupDAO bloodGroupRoomDAO();
+    public abstract MaritalStatusDAO maritalStatusRoomDAO();
+    public abstract ReligionDAO religionRoomDAO();
 
     /**
      * Observation room dao observation room dao.

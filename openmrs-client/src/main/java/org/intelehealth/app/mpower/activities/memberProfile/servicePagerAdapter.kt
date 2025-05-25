@@ -11,6 +11,7 @@ import com.openmrs.android_sdk.utilities.ApplicationConstants
 import com.openmrs.android_sdk.utilities.ApplicationConstants.MemberProfileTabs.SERVICE_FORM
 import com.openmrs.android_sdk.utilities.ApplicationConstants.MemberProfileTabs.SERVICE_HISTORY
 import org.intelehealth.app.mpower.R
+import org.intelehealth.app.mpower.activities.memberProfile.serviceForm.ServiceFormFragment
 
 class ServicePagerAdapter(private val fm: FragmentManager,
                                    private val context: Context,

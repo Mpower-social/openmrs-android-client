@@ -165,6 +165,66 @@ class SyncedPatientsViewModel @Inject constructor(
         }
     }
 
+    fun getAllLocation() {
+        if (NetworkUtils.isOnline()) {
+            if (patientRepository.globalLocationDAO.getAllLocation().isEmpty()) {
+                setLoading()
+                addSubscription(patientRepository.allLocation
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        {},
+                        { }
+                    )
+                )
+            }
+        }
+    }
+
+    fun getAllBloodGroup() {
+        if (NetworkUtils.isOnline()) {
+            if (patientRepository.bloodGroupDAO.getAllBloodGroup().isEmpty()) {
+                setLoading()
+                addSubscription(patientRepository.bloodGroupList
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        {},
+                        { }
+                    )
+                )
+            }
+        }
+    }
+
+    fun getAllMaritalStatus() {
+        if (NetworkUtils.isOnline()) {
+            if (patientRepository.maritalStatusDAO.getAllMaritalStatus().isEmpty()) {
+                setLoading()
+                addSubscription(patientRepository.maritalStatusList
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        {},
+                        { }
+                    )
+                )
+            }
+        }
+    }
+    fun getAllReligion() {
+        if (NetworkUtils.isOnline()) {
+            if (patientRepository.religionDAO.getAllReligion().isEmpty()) {
+                setLoading()
+                addSubscription(patientRepository.religionList
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        {},
+                        { }
+                    )
+                )
+            }
+        }
+    }
+
+
     fun fetchSyncedPatientsOnRefresh(query: String) {
         if (NetworkUtils.isOnline()) {
             setLoading()
@@ -185,6 +245,7 @@ class SyncedPatientsViewModel @Inject constructor(
     private fun insertServerPatients(patients: List<Patient>) {
         val mPatients: MutableList<Patient> = mutableListOf()
         for (sPatient in patients) {
+            //  Log.d("xxx", "bloog group: "+sPatient.person)
             if (sPatient.uuid != null && sPatient.uuid!!.isNotEmpty()) {
                 val isSaved = patientDAO.isUserAlreadySaved(sPatient.uuid!!)
                 if (!isSaved) {
@@ -228,6 +289,9 @@ class SyncedPatientsViewModel @Inject constructor(
             this.uuid = personUuid
             this.person.uuid = personUuid
             this.person.gender = gender
+            this.bloodGroup = getBloodGroupValue(this@fromReferredPatient.bloodGroup!!)
+            this.relegion = getReligionValue(this@fromReferredPatient.relegion!!)
+            this.matritalStatus = getMaritalStatusValue(this@fromReferredPatient.matritalStatus!!)
             this.person.birthdate = parseDateTime(this@fromReferredPatient.birthdate!!)
             this.identifiers = mutableListOf(
                 PatientIdentifier().apply {
@@ -239,6 +303,52 @@ class SyncedPatientsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun getMaritalStatusValue(key: String): String {
+        var value = ""
+
+        when (key) {
+            "6e4a97f3-e6ab-4bf0-8fbd-8bf8b0361500" -> value = "Married"
+            "58605e6c-7043-4896-888c-564fef1c23e3" -> value = "Single"
+            "875b5d4b-1498-4734-b14f-adc10d46fbd3" -> value = "Divorced"
+            "413a4a02-573b-4dba-a875-afa43dbab3e4" -> value = "Conjugal Separation"
+            "08076fad-b454-4f74-9a4c-765672e97afb" -> value = "Unmarried"
+            "85b0846f-3723-45ae-a840-60e12c273a7e" -> value = "Widow"
+            "d13f1522-7a28-4dff-8d7d-dd32f43f4a63" -> value = "Widower"
+        }
+
+        return value
+    }
+
+    private fun getBloodGroupValue(key: String): String {
+        var value = ""
+        when (key) {
+            "1a9aa408-e1c0-437a-8082-b882b07d5243" -> value = "A+"
+            "bd527e15-8515-4ee0-8d14-4260f3813866" -> value = "A-"
+            "19bd03b0-2c94-4d90-9728-d5ba41ac47b5" -> value = "B+"
+            "21bd05a5-5816-4d28-ab11-4d18c121540c" -> value = "B-"
+            "8d974903-3cc9-4471-be64-49551923d8b3" -> value = "AB+"
+            "a30d9efc-6381-4885-a74b-d4e03955ec03" -> value = "AB-"
+            "9566b37e-3db5-49f0-ac3e-d620a2835758" -> value = "O+"
+            "243bd990-ba5b-418a-ba89-ceeb80947340" -> value = "O-"
+        }
+        return value
+    }
+
+    private fun getReligionValue(key: String): String {
+        var value = ""
+
+        when (key) {
+            "e52294c1-1f7f-49ae-adea-3574611fa464" -> value = "Islam"
+            "bfce7390-4954-4a95-aa3d-b525d20527a0" -> value = "Hinduism"
+            "810cb734-25bf-4604-9088-6035bf963799" -> value = "Christianity"
+            "53dd5fe1-790b-4f63-a927-c93e66358f09" -> value = "Buddhism"
+            "5622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" -> value = "Other"
+        }
+
+        return value
+    }
+
 
     private fun parseDateTime(value: Long): String {
         val date = Date(value)

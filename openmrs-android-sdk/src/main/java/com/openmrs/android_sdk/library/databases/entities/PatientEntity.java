@@ -50,6 +50,12 @@ public class PatientEntity extends Resource {
     private String deceased;
     @ColumnInfo(name = "encounters")
     private String encounters;
+    @ColumnInfo(name = "matritalStatus")
+    private String matritalStatus;
+    @ColumnInfo(name = "relegion")
+    private String relegion;
+    @ColumnInfo(name = "bloodGroup")
+    private String bloodGroup;
 
     /**
      * Added to store whole person information
@@ -116,6 +122,30 @@ public class PatientEntity extends Resource {
      */
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public String getMatritalStatus() {
+        return matritalStatus;
+    }
+
+    public void setMatritalStatus(String matritalStatus) {
+        this.matritalStatus = matritalStatus;
+    }
+
+    public String getRelegion() {
+        return relegion;
+    }
+
+    public void setRelegion(String relegion) {
+        this.relegion = relegion;
+    }
+
+    public String getBloodGroup() {
+        return bloodGroup;
+    }
+
+    public void setBloodGroup(String bloodGroup) {
+        this.bloodGroup = bloodGroup;
     }
 
     /**

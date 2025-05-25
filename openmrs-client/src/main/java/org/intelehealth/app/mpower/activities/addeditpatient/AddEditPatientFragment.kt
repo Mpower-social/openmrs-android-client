@@ -26,6 +26,7 @@ import android.os.Environment
 import android.os.StrictMode
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -135,7 +136,7 @@ class AddEditPatientFragment : BaseFragment(), onInputSelected {
 
         setupPermissionsHandler()
 
-        initPlaces()
+       // initPlaces()
 
         initSpinners()
 
@@ -270,6 +271,7 @@ class AddEditPatientFragment : BaseFragment(), onInputSelected {
         })
 
         viewModel.bloodGroupOptionList.observe(viewLifecycleOwner, Observer { mStatusList ->
+            Log.d("xxx", "setupObservers: blood "+mStatusList.size)
             hideLoading()
             if (mStatusList.isNotEmpty()){
                 updateBloodGroupSpinner()
@@ -712,6 +714,9 @@ class AddEditPatientFragment : BaseFragment(), onInputSelected {
         val mPerson = Person()
         mPerson.names = viewModel.patient.names
         mPerson.gender = viewModel.patient.gender
+        mPerson.bloodGroup = viewModel.patient.bloodGroup
+        mPerson.matritalStatus = viewModel.patient.matritalStatus
+        mPerson.relegion = viewModel.patient.relegion
         mPerson.age = viewModel.patient.age
         mPerson.birthdate = viewModel.patient.birthdate
         mPerson.display = viewModel.patient.display
@@ -1171,6 +1176,7 @@ class AddEditPatientFragment : BaseFragment(), onInputSelected {
                     viewModel.selectedMaritalStatusOption = ConceptOption()
                 } else {
                     viewModel.selectedMaritalStatusOption = viewModel.mStatusOptionList.value?.get(i - 1)!!
+                    viewModel.patient.matritalStatus = dList[i]
                 }
             }
 
@@ -1188,6 +1194,7 @@ class AddEditPatientFragment : BaseFragment(), onInputSelected {
                     viewModel.selectedBloodGroupOption = ConceptOption()
                 } else {
                     viewModel.selectedBloodGroupOption = viewModel.bloodGroupOptionList.value?.get(i - 1)!!
+                    viewModel.patient.bloodGroup = dList[i]
                 }
             }
 
@@ -1205,6 +1212,7 @@ class AddEditPatientFragment : BaseFragment(), onInputSelected {
                     viewModel.selectedReligionOption = ConceptOption()
                 } else {
                     viewModel.selectedReligionOption = viewModel.religionOptionList.value?.get(i - 1)!!
+                    viewModel.patient.relegion = dList[i]
                 }
             }
 

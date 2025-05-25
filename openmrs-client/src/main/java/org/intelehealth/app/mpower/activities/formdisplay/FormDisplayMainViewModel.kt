@@ -8,9 +8,11 @@
  */
 package org.intelehealth.app.mpower.activities.formdisplay
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import com.google.gson.GsonBuilder
 import com.openmrs.android_sdk.library.api.repository.EncounterRepository
 import com.openmrs.android_sdk.library.api.repository.FormRepository
 import com.openmrs.android_sdk.library.dao.PatientDAO
@@ -21,14 +23,12 @@ import com.openmrs.android_sdk.library.models.ResultType
 import com.openmrs.android_sdk.utilities.ApplicationConstants.BundleKeys.ENCOUNTERTYPE
 import com.openmrs.android_sdk.utilities.ApplicationConstants.BundleKeys.ENCOUNTER_UUID
 import com.openmrs.android_sdk.utilities.ApplicationConstants.BundleKeys.FORM_NAME
-import com.openmrs.android_sdk.utilities.ApplicationConstants.BundleKeys.PATIENT_ID_BUNDLE
 import com.openmrs.android_sdk.utilities.InputField
 import com.openmrs.android_sdk.utilities.SelectOneField
-import com.openmrs.android_sdk.utilities.ToastUtil
 import com.openmrs.android_sdk.utilities.execute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import org.joda.time.LocalDateTime
 import org.intelehealth.app.mpower.activities.BaseViewModel
+import org.joda.time.LocalDateTime
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import javax.inject.Inject
@@ -50,6 +50,12 @@ class FormDisplayMainViewModel @Inject constructor(
     var patient: Patient = Patient()
 
     fun submitForm(inputFields: List<InputField>, radioGroupFields: List<SelectOneField>): LiveData<ResultType> {
+
+
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        val mjson = gson.toJson(radioGroupFields)
+        Log.d("xxx", "mjson: $mjson")
+
         val enc = Encountercreate()
         enc.patientId = patient.id
         enc.observations = createObservationsFromInputFields(inputFields) + createObservationsFromRadioGroupFields(radioGroupFields)

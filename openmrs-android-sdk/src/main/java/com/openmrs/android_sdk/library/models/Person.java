@@ -43,6 +43,19 @@ public class Person extends Resource implements Serializable {
     @SerializedName("gender")
     @Expose
     private String gender;
+
+    @SerializedName("matritalStatus")
+    @Expose
+    private String matritalStatus;
+
+    @SerializedName("relegion")
+    @Expose
+    private String relegion;
+
+    @SerializedName("bloodGroup")
+    @Expose
+    private String bloodGroup;
+
     @SerializedName("age")
     @Expose
     private int age;
@@ -112,6 +125,30 @@ public class Person extends Resource implements Serializable {
      */
     public List<PersonName> getNames() {
         return names;
+    }
+
+    public String getMatritalStatus() {
+        return matritalStatus;
+    }
+
+    public void setMatritalStatus(String matritalStatus) {
+        this.matritalStatus = matritalStatus;
+    }
+
+    public String getRelegion() {
+        return relegion;
+    }
+
+    public void setRelegion(String relegion) {
+        this.relegion = relegion;
+    }
+
+    public String getBloodGroup() {
+        return bloodGroup;
+    }
+
+    public void setBloodGroup(String bloodGroup) {
+        this.bloodGroup = bloodGroup;
     }
 
     /**

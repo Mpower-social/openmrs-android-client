@@ -42,11 +42,12 @@ class MemberProfileActivity : ACBaseActivity(), View.OnClickListener {
         observeData()
         initViewPager()
 
-        if(mViewModel.patient.display != null && mViewModel.patient.display!!.isNotEmpty()){
-            mViewModel.fetchPatientFromDB(mViewModel.patient.uuid!!)
-        } else {
-            mViewModel.fetchProfileDetail(mViewModel.patient.person.uuid!!)
-        }
+        mViewModel.fetchPatientFromDB(mViewModel.patient.uuid!!)
+//        if(mViewModel.patient.display != null && mViewModel.patient.display!!.isNotEmpty()){
+//            mViewModel.fetchPatientFromDB(mViewModel.patient.uuid!!)
+//        } else {
+//            mViewModel.fetchProfileDetail(mViewModel.patient.person.uuid!!)
+//        }
 
         supportActionBar?.let {
             it.elevation = 0f
@@ -85,18 +86,15 @@ class MemberProfileActivity : ACBaseActivity(), View.OnClickListener {
                 else -> throw IllegalStateException()
             }
         })
-        mViewModel.rxReligion.observe(this, Observer {
-            mBinding.tvMemberReligion.text = it
-        })
-        mViewModel.rxMaritalStatus.observe(this, Observer {
-            mBinding.tvMemberMaritalStatus.text = it
-        })
-        mViewModel.rxBloodGroup.observe(this, Observer {
-            mBinding.tvMemberBloodGroup.text = it
-        })
-        mViewModel.rxBloodGroup.observe(this, Observer {
-            mBinding.tvMemberBloodGroup.text = it
-        })
+//        mViewModel.rxReligion.observe(this, Observer {
+//            mBinding.tvMemberReligion.text = it
+//        })
+//        mViewModel.rxMaritalStatus.observe(this, Observer {
+//            mBinding.tvMemberMaritalStatus.text = it
+//        })
+//        mViewModel.rxBloodGroup.observe(this, Observer {
+//            mBinding.tvMemberBloodGroup.text = it
+//        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

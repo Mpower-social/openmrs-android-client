@@ -1,26 +1,24 @@
 package com.openmrs.android_sdk.library.api.repository
 
 import android.util.Log
+import com.google.gson.GsonBuilder
 import com.openmrs.android_sdk.library.OpenmrsAndroid
 import com.openmrs.android_sdk.library.dao.EncounterDAO
 import com.openmrs.android_sdk.library.dao.EncounterRoomDAO
 import com.openmrs.android_sdk.library.dao.PatientDAO
-import com.openmrs.android_sdk.library.dao.VisitDAO
 import com.openmrs.android_sdk.library.databases.AppDatabase
 import com.openmrs.android_sdk.library.databases.AppDatabaseHelper
-import com.openmrs.android_sdk.library.models.Encountercreate
-import com.openmrs.android_sdk.library.models.Visit
-import com.openmrs.android_sdk.library.models.ResultType
+import com.openmrs.android_sdk.library.databases.entities.StandaloneEncounterEntity
+import com.openmrs.android_sdk.library.models.ConceptClass
 import com.openmrs.android_sdk.library.models.Encounter
 import com.openmrs.android_sdk.library.models.EncounterType
-import com.openmrs.android_sdk.library.models.ConceptClass
+import com.openmrs.android_sdk.library.models.Encountercreate
 import com.openmrs.android_sdk.library.models.Resource
-import com.openmrs.android_sdk.library.databases.entities.StandaloneEncounterEntity
+import com.openmrs.android_sdk.library.models.ResultType
+import com.openmrs.android_sdk.library.models.Visit
 import com.openmrs.android_sdk.utilities.NetworkUtils
 import com.openmrs.android_sdk.utilities.execute
 import rx.Observable
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import java.util.concurrent.Callable
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -132,6 +130,9 @@ class EncounterRepository @Inject constructor(
                         val encounter = getEncounterByUuid(resource.uuid!!).execute()
                         encounterList.add(encounter)
                     }
+                    val gson = GsonBuilder().setPrettyPrinting().create()
+                    val mjson = gson.toJson(encounterList)
+                    Log.d("Patient Save", "mjson: $mjson")
                     return@Callable encounterList.toList()
                 } else {
                     throw Exception("Get Encounters error: ${message()}")

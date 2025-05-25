@@ -21,12 +21,16 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -34,8 +38,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import rx.Observable;
+
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -50,13 +58,24 @@ import com.openmrs.android_sdk.library.OpenmrsAndroid;
 import com.openmrs.android_sdk.library.api.RestApi;
 import com.openmrs.android_sdk.library.api.RestServiceBuilder;
 import com.openmrs.android_sdk.library.api.workers.UpdatePatientWorker;
+import com.openmrs.android_sdk.library.dao.BloodGroupDAO;
 import com.openmrs.android_sdk.library.dao.EncounterCreateRoomDAO;
+import com.openmrs.android_sdk.library.dao.GlobalLocationDAO;
+import com.openmrs.android_sdk.library.dao.MaritalStatusDAO;
 import com.openmrs.android_sdk.library.dao.PatientDAO;
 import com.openmrs.android_sdk.library.dao.ProductDAO;
+import com.openmrs.android_sdk.library.dao.ReligionDAO;
 import com.openmrs.android_sdk.library.databases.AppDatabase;
 import com.openmrs.android_sdk.library.databases.AppDatabaseHelper;
+import com.openmrs.android_sdk.library.databases.entities.BloodGroupEntity;
+import com.openmrs.android_sdk.library.databases.entities.GlobalLocationEntity;
+import com.openmrs.android_sdk.library.databases.entities.MaritalStatusEntity;
 import com.openmrs.android_sdk.library.databases.entities.ProductModelEntity;
+import com.openmrs.android_sdk.library.databases.entities.ReligionEntity;
 import com.openmrs.android_sdk.library.models.CallTokenModel;
+import com.openmrs.android_sdk.library.models.ConceptAnswers;
+import com.openmrs.android_sdk.library.models.ConceptApiResponse;
+import com.openmrs.android_sdk.library.models.ConceptOption;
 import com.openmrs.android_sdk.library.models.CustomIdGenPatientIdentifiers;
 import com.openmrs.android_sdk.library.models.CustomPatientIdentifier;
 import com.openmrs.android_sdk.library.models.Encountercreate;
@@ -88,6 +107,7 @@ import com.openmrs.android_sdk.utilities.NetworkUtils;
 import com.openmrs.android_sdk.utilities.PatientComparator;
 import com.openmrs.android_sdk.utilities.ToastUtil;
 
+import org.intelehealth.klivekit.data.PreferenceHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,7 +121,18 @@ public class PatientRepository extends BaseRepository {
     private final LocationRepository locationRepository;
     private final EncounterRepository encounterRepository;
 
+    private PreferenceHelper preferenceHelper = new PreferenceHelper(OpenmrsAndroid.getInstance().getApplicationContext());
     private final ProductDAO productDAO = AppDatabase.getDatabase(OpenmrsAndroid.getInstance().getApplicationContext()).productRoomDAO();
+    public final GlobalLocationDAO globalLocationDAO = AppDatabase.getDatabase(OpenmrsAndroid.getInstance().getApplicationContext()).globalLocationRoomDAO();
+    public final BloodGroupDAO bloodGroupDAO = AppDatabase.getDatabase(OpenmrsAndroid.getInstance().getApplicationContext()).bloodGroupRoomDAO();
+    public final MaritalStatusDAO maritalStatusDAO = AppDatabase.getDatabase(OpenmrsAndroid.getInstance().getApplicationContext()).maritalStatusRoomDAO();
+    public final ReligionDAO religionDAO = AppDatabase.getDatabase(OpenmrsAndroid.getInstance().getApplicationContext()).religionRoomDAO();
+
+//    private val preferenceHelper: PreferenceHelper by lazy {
+//        PreferenceHelper(applicationContext)
+//    }
+
+    private PreferenceManager preferenceManager;
 
 
     /**
@@ -218,6 +249,7 @@ public class PatientRepository extends BaseRepository {
             patientCreateDTO.setIdentifiers(identifiers);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String mjson = gson.toJson(patientCreateDTO);
+            Log.d("Patient Save", "mjson: " + mjson);
 
             Response<PatientDto> response = restApi.createPatientDTO(patientCreateDTO).execute();
             if (response.isSuccessful()) {
@@ -226,7 +258,7 @@ public class PatientRepository extends BaseRepository {
                 patient.getPerson().setAttributes(returnedPatientDto.getPerson().getAttributes());
                 patient.getPerson().setDisplay(returnedPatientDto.getPerson().getDisplay());
                 patient.setIdentifiers(returnedPatientDto.getIdentifiers());
-                patientDAO.updatePatient(patient.getId(), patient);
+                patientDAO.updatePatientAfterSaveOnline(patient.getId(), patient);
 
 //                if (!patient.getEncounters().isEmpty()) {
 //                    addEncounters(patient);
@@ -239,6 +271,78 @@ public class PatientRepository extends BaseRepository {
             }
 
         });
+    }
+
+    // get all location
+
+    public Observable<Boolean> getAllLocation() {
+        return createObservableIO(() -> {
+            try {
+
+                fetchAllLocation();
+                return true;
+            } catch (Exception ex) {
+                throw new Exception("location list error: " + ex.toString());
+            }
+        });
+    }
+
+    public void fetchAllLocation() throws Exception {
+        try {
+
+            String lastDate = preferenceHelper.getString(PreferenceHelper.LAST_LOCATION_DATE);
+            if (TextUtils.isEmpty(lastDate)) {
+                lastDate = "1970-01-01 12:00:00";
+            }
+
+            Response<ResponseBody> response = restApi.getAllLocation(lastDate).execute();
+            if (response.isSuccessful()) {
+                String body = response.body().string();
+                JSONArray jsonArray = new JSONArray(body);
+                if (jsonArray.length() == 0) return;
+
+                if (jsonArray.length() > 0) {
+                    String tempDate = lastDate;
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        try {
+                            JSONObject object = jsonArray.getJSONObject(i);
+                            GlobalLocationEntity globalLocation = new Gson().fromJson(object.toString(), GlobalLocationEntity.class);
+                            if (globalLocation != null) {
+                                if (isDate1Greater(globalLocation.getDateChanged(), tempDate)) {
+                                    tempDate = globalLocation.getDateChanged();
+                                }
+                                globalLocationDAO.addLocation(globalLocation);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    preferenceHelper.save(PreferenceHelper.LAST_LOCATION_DATE, tempDate);
+                    fetchAllLocation();
+                }
+
+            } else {
+                throw new Exception("location list error: " + response.message());
+            }
+        } catch (Exception ex) {
+            throw new Exception("location list error: " + ex.toString());
+        }
+    }
+
+    public static boolean isDate1Greater(String date1Str, String date2Str) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date date1 = sdf.parse(date1Str);
+            Date date2 = sdf.parse(date2Str);
+
+            return date1 != null && date2 != null && date1.after(date2);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false; // or handle the exception as needed
+        }
     }
 
     public Observable<ResponseBody> getProductList() {
@@ -269,6 +373,170 @@ public class PatientRepository extends BaseRepository {
         });
     }
 
+    public Observable<ResponseBody> getBloodGroupList() {
+        return createObservableIO(() -> {
+            try {
+                Response<ResponseBody> response = restApi.getConceptAnswersAsResponseBody(ApplicationConstants.PATIENTS_BLOOD_GROUP_OPTIONS_UUID).execute();
+                if (response.isSuccessful()) {
+                    String body = response.body().string();
+                    ConceptApiResponse productModel = new Gson().fromJson(body, ConceptApiResponse.class);
+
+                    for (ConceptOption conceptOption : productModel.getAnswers()) {
+                        bloodGroupDAO.addBloodGroup(convertConceptOptionToBloodGroupEntity(conceptOption));
+                    }
+
+                    return response.body();
+                } else {
+                    throw new Exception("product list error: " + response.message());
+                }
+            } catch (Exception ex) {
+                throw new Exception("product list error: " + ex.toString());
+            }
+        });
+    }
+
+    public List<ConceptOption> getBloodGroupLocally() throws Exception {
+
+        try {
+            List<ConceptOption> conceptOptions = new ArrayList<>();
+            List<BloodGroupEntity> bloodGroupEntities = bloodGroupDAO.getAllBloodGroup();
+
+            for (BloodGroupEntity bloodGroupEntity : bloodGroupEntities) {
+                conceptOptions.add(convertBloodGroupEntityToConceptOption(bloodGroupEntity));
+            }
+
+            return conceptOptions;
+
+        } catch (Exception ex) {
+            throw new Exception("product list error: " + ex.toString());
+        }
+    }
+
+    public ConceptOption convertBloodGroupEntityToConceptOption(BloodGroupEntity bloodGroupEntity) {
+        ConceptOption conceptOption = new ConceptOption();
+        conceptOption.setUuid(bloodGroupEntity.getUuid());
+        conceptOption.setDisplay(bloodGroupEntity.getDisplay());
+        return conceptOption;
+    }
+
+    public BloodGroupEntity convertConceptOptionToBloodGroupEntity(ConceptOption conceptOption) {
+        BloodGroupEntity bloodGroupEntity = new BloodGroupEntity();
+        bloodGroupEntity.setUuid(conceptOption.getUuid());
+        bloodGroupEntity.setDisplay(conceptOption.getDisplay());
+        return bloodGroupEntity;
+    }
+
+    public Observable<ResponseBody> getMaritalStatusList() {
+        return createObservableIO(() -> {
+            try {
+                Response<ResponseBody> response = restApi.getConceptAnswersAsResponseBody(ApplicationConstants.PATIENTS_MARITAL_STATUS_OPTIONS_UUID).execute();
+                if (response.isSuccessful()) {
+                    String body = response.body().string();
+                    ConceptApiResponse productModel = new Gson().fromJson(body, ConceptApiResponse.class);
+
+                    for (ConceptOption conceptOption : productModel.getAnswers()) {
+                        maritalStatusDAO.addMaritalStatus(convertConceptOptionToMaritalStatusEntity(conceptOption));
+                    }
+
+                    return response.body();
+                } else {
+                    throw new Exception("product list error: " + response.message());
+                }
+            } catch (Exception ex) {
+                throw new Exception("product list error: " + ex.toString());
+            }
+        });
+    }
+
+    public List<ConceptOption> getMaritalStatusLocally() throws Exception {
+
+        try {
+            List<ConceptOption> conceptOptions = new ArrayList<>();
+            List<MaritalStatusEntity> maritalStatusEntities = maritalStatusDAO.getAllMaritalStatus();
+
+            for (MaritalStatusEntity maritalStatus : maritalStatusEntities) {
+                conceptOptions.add(convertMaritalStatusEntityToConceptOption(maritalStatus));
+            }
+
+            return conceptOptions;
+
+        } catch (Exception ex) {
+            throw new Exception("product list error: " + ex.toString());
+        }
+
+
+    }
+
+    public ConceptOption convertMaritalStatusEntityToConceptOption(MaritalStatusEntity maritalStatusEntity) {
+        ConceptOption conceptOption = new ConceptOption();
+        conceptOption.setUuid(maritalStatusEntity.getUuid());
+        conceptOption.setDisplay(maritalStatusEntity.getDisplay());
+        return conceptOption;
+    }
+
+    public MaritalStatusEntity convertConceptOptionToMaritalStatusEntity(ConceptOption conceptOption) {
+        MaritalStatusEntity bloodGroupEntity = new MaritalStatusEntity();
+        bloodGroupEntity.setUuid(conceptOption.getUuid());
+        bloodGroupEntity.setDisplay(conceptOption.getDisplay());
+        return bloodGroupEntity;
+    }
+
+    public Observable<ResponseBody> getReligionList() {
+        return createObservableIO(() -> {
+            try {
+                Response<ResponseBody> response = restApi.getConceptAnswersAsResponseBody(ApplicationConstants.PATIENTS_RELIGION_OPTIONS_UUID).execute();
+                if (response.isSuccessful()) {
+                    String body = response.body().string();
+                    ConceptApiResponse productModel = new Gson().fromJson(body, ConceptApiResponse.class);
+
+                    for (ConceptOption conceptOption : productModel.getAnswers()) {
+                        religionDAO.addReligion(convertConceptOptionToReligionEntity(conceptOption));
+                    }
+
+                    return response.body();
+                } else {
+                    throw new Exception("product list error: " + response.message());
+                }
+            } catch (JSONException ex) {
+                Log.d("xxx", "getReligionList Error: " + ex.getMessage());
+                throw new Exception("product list error: " + ex.toString());
+            }
+        });
+    }
+
+    public List<ConceptOption> getReligionListLocally() throws Exception {
+
+            try {
+                List<ConceptOption> conceptOptions = new ArrayList<>();
+                List<ReligionEntity> religionEntities = religionDAO.getAllReligion();
+
+                for (ReligionEntity religionEntity : religionEntities) {
+                    conceptOptions.add(convertReligionEntityToConceptOption(religionEntity));
+                }
+
+                return conceptOptions;
+
+            } catch (Exception ex) {
+                throw new Exception("product list error: " + ex.toString());
+            }
+
+
+    }
+
+    public ReligionEntity convertConceptOptionToReligionEntity(ConceptOption conceptOption) {
+        ReligionEntity bloodGroupEntity = new ReligionEntity();
+        bloodGroupEntity.setUuid(conceptOption.getUuid());
+        bloodGroupEntity.setDisplay(conceptOption.getDisplay());
+        return bloodGroupEntity;
+    }
+
+    public ConceptOption convertReligionEntityToConceptOption(ReligionEntity religionEntity) {
+        ConceptOption conceptOption = new ConceptOption();
+        conceptOption.setUuid(religionEntity.getUuid());
+        conceptOption.setDisplay(religionEntity.getDisplay());
+        return conceptOption;
+    }
+
     public Observable<ResponseBody> savePatient(final PatientSaveDTO psDTO) {
         return createObservableIO(() -> {
             try{
@@ -282,6 +550,7 @@ public class PatientRepository extends BaseRepository {
                    // String aa = response.body().toString();
                     return response.body();
                 } else {
+                    Log.d("Patient Save", "error: " + response.message());
                     throw new Exception("savePatient error: " + response.message());
                 }
             } catch (Exception ex) {
@@ -709,6 +978,7 @@ public class PatientRepository extends BaseRepository {
             Response<ResponseBody> response = call.execute();
             if (response.isSuccessful() && response.body() != null) {
                 String rawJson = response.body().string();
+                Log.d("xxx", "findPatients: " + rawJson);
                 return new Gson().fromJson(rawJson, ReferredPatientResponse.class).getPersons();
             } else {
                 throw new Exception("Error with finding patients: " + response.message());

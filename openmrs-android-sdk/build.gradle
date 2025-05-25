@@ -145,6 +145,10 @@ android {
     }
 }
 
+dependencies {
+    implementation project(':klivekit')
+}
+
 dokkaHtml.configure {
     dokkaSourceSets {
         named("main") {

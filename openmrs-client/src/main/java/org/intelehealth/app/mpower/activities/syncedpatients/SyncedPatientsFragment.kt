@@ -69,6 +69,10 @@ class SyncedPatientsFragment : BaseFragment(), View.OnClickListener{
             setupObserver()
             fetchSyncedPatients()
             fetchProductList()
+            fetchLocationList()
+            fetchBloodGroupList()
+            fetchMaritalStatusList()
+            fetchReligionList()
 
             swipeLayout.setOnRefreshListener {
                 fetchSyncedPatients()
@@ -95,9 +99,25 @@ class SyncedPatientsFragment : BaseFragment(), View.OnClickListener{
         viewModel.fetchSyncedPatients()
     }
 
-    fun fetchProductList() {
+    private fun fetchProductList() {
         viewModel.getProductList()
     }
+
+    private fun fetchLocationList() {
+        viewModel.getAllLocation()
+    }
+
+    private fun fetchBloodGroupList() {
+        viewModel.getAllBloodGroup()
+    }
+
+    private fun fetchMaritalStatusList() {
+        viewModel.getAllMaritalStatus()
+    }
+    private fun fetchReligionList() {
+        viewModel.getAllReligion()
+    }
+
 
     fun fetchSyncedPatientsOnRefresh(query: String) {
         viewModel.fetchSyncedPatientsOnRefresh(query)
@@ -119,7 +139,6 @@ class SyncedPatientsFragment : BaseFragment(), View.OnClickListener{
     }
 
     private fun showPatientsList(patients: List<Patient>) {
-        Log.d("xxx", "showPatientsList: "+patients.size)
         with(binding) {
             syncedPatientsInitialProgressBar.makeGone()
             if (patients.isEmpty()) {

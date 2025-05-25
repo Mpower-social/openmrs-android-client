@@ -56,6 +56,9 @@ class MemberProfileViewModel @Inject constructor(
     var mobile: String = ""
     var nid: String = ""
     var age: String = ""
+    var bloodGroup: String = ""
+    var relegion: String = ""
+    var matritalStatus: String = ""
 
     private val _rxFormList = MutableLiveData<List<String>>()
     val rxFormList: LiveData<List<String>> get() = _rxFormList
@@ -69,31 +72,61 @@ class MemberProfileViewModel @Inject constructor(
         lastName = patient.person.names[0].familyName ?: ""
         age = patient.person.age.toString()
         dob = DateUtils.convertTime1(patient.person.birthdate, DateUtils.OPEN_MRS_REQUEST_PATIENT_FORMAT)
+        relegion = patient.relegion ?: ""
+        matritalStatus = patient.matritalStatus ?: ""
+        bloodGroup = patient.bloodGroup ?: ""
         patient.person.attributes.forEach {
-            if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_NID)){
-                nid = it.value ?: ""
-            } else if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_MOBILE)){
-                mobile = it.value ?: ""
-            } else if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_RELIGION)){
-                if(it.value != null && !it.value.equals("")){
-                    fetchReligion(it.value!!)
+
+            if(!it.display.isNullOrEmpty()){
+                val textBeforeEqual = it.display!!.substringBefore("=").trim()
+
+                if(textBeforeEqual == ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_NID){
+                    nid = getValueAfterEqualSign(it.display!!)
                 }
-            } else if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_MARITAL_STATUS)){
-                if(it.value != null && !it.value.equals("")){
-                    fetchMaritalStatus(it.value!!)
+                else if(textBeforeEqual == ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_MOBILE){
+                    mobile = getValueAfterEqualSign(it.display!!)
                 }
-            } else if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_BLOOD_GROUP)){
-                if(it.value != null && !it.value.equals("")){
-                    fetchBloodGroup(it.value!!)
-                }
+//                else if(textBeforeEqual == ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_RELIGION){
+//                    fetchReligion(getValueAfterEqualSign(it.display!!))
+//                }
+//                else if(textBeforeEqual == ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_MARITAL_STATUS){
+//                    fetchMaritalStatus(getValueAfterEqualSign(it.display!!))
+//                }
+//                else if(textBeforeEqual == ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_BLOOD_GROUP){
+//                    fetchBloodGroup(getValueAfterEqualSign(it.display!!))
+//                }
             }
+
+//            if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_NID)){
+//                nid = it.value ?: ""
+//            } else if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_MOBILE)){
+//                mobile = it.value ?: ""
+//            } else if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_RELIGION)){
+//                if(it.value != null && !it.value.equals("")){
+//                    fetchReligion(it.value!!)
+//                }
+//            } else if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_MARITAL_STATUS)){
+//                if(it.value != null && !it.value.equals("")){
+//                    fetchMaritalStatus(it.value!!)
+//                }
+//            } else if(it.attributeType?.display.equals(ApplicationConstants.MemberProfileKeys.MEMBER_PROFILE_BLOOD_GROUP)){
+//                if(it.value != null && !it.value.equals("")){
+//                    fetchBloodGroup(it.value!!)
+//                }
+//            }
         }
+    }
+
+    private fun getValueAfterEqualSign(text: String): String{
+        var resultText = ""
+        resultText = text.substringAfter("=").trim()
+        return resultText
     }
 
     fun populateServiceForm() {
         val mList = encounterRepository.getLocalEncounterCreateByPatientUUID(patient.uuid!!).execute()
 
-        if (rxMaritalStatus.value == ApplicationConstants.AttributeValues.MARRIED
+        if (matritalStatus == ApplicationConstants.AttributeValues.MARRIED
             && age.toInt() > 15
             && patient.person.gender == ApplicationConstants.GENDER.FEMALE) {
             if(!mList.isNullOrEmpty()){
@@ -219,7 +252,8 @@ class MemberProfileViewModel @Inject constructor(
     fun fetchPatientFromDB(uuid: String) {
         setLoading()
         val localPatient = patientDAO.findPatientByUUID(uuid)
-        if(localPatient.uuid != null && localPatient.uuid!!.isNotEmpty() && localPatient.display != null && localPatient.display!!.isNotEmpty()){
+       // if(localPatient.uuid != null && localPatient.uuid!!.isNotEmpty() && localPatient.display != null && localPatient.display!!.isNotEmpty()){
+        if(localPatient.uuid != null && localPatient.uuid!!.isNotEmpty()){
             setContent(localPatient, OperationType.FetchProfileDetail)
         }
     }

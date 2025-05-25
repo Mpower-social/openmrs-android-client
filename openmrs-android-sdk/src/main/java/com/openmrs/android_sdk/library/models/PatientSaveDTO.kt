@@ -78,25 +78,25 @@ class PatientSaveDTO : Person() {
     @Expose
     var occupation: String? = null
 
-    @SerializedName("relegion")
-    @Expose
-    var relegion: String? = null
+//    @SerializedName("relegion")
+//    @Expose
+//    var relegion: String? = null
 
     @SerializedName("division")
     @Expose
     var division: String? = null
 
-    @SerializedName("bloodGroup")
-    @Expose
-    var bloodGroup: String? = null
+//    @SerializedName("bloodGroup")
+//    @Expose
+//    var bloodGroup: String? = null
 
     @SerializedName("eduQualification")
     @Expose
     var eduQualification: String? = null
 
-    @SerializedName("matritalStatus")
-    @Expose
-    var matritalStatus: String? = null
+//    @SerializedName("matritalStatus")
+//    @Expose
+//    var matritalStatus: String? = null
 
     @SerializedName("ethnicity")
     @Expose

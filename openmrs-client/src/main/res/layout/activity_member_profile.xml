@@ -324,6 +324,7 @@
                                     android:id="@+id/tvMemberReligion"
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
+                                    android:text="@={viewModel.relegion}"
                                     android:textSize="14sp"
                                     android:textStyle="normal"
                                     android:layout_weight="0.6"/>
@@ -358,6 +359,7 @@
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:textSize="14sp"
+                                    android:text="@={viewModel.matritalStatus}"
                                     android:textStyle="normal"
                                     android:layout_weight="0.6"/>
 
@@ -425,6 +427,7 @@
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:textSize="14sp"
+                                    android:text="@={viewModel.bloodGroup}"
                                     android:textStyle="normal"
                                     android:layout_weight="0.6"/>
 

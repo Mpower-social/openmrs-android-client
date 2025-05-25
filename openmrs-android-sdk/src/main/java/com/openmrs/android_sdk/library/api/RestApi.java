@@ -123,6 +123,10 @@ public interface RestApi {
     @GET("concept/{uuid}")
     Call<ConceptApiResponse> getConceptAnswers(@Path("uuid") String obsUuid);
 
+
+    @GET("concept/{uuid}")
+    Call<ResponseBody> getConceptAnswersAsResponseBody(@Path("uuid") String obsUuid);
+
     /**
      * Gets system property.
      *
@@ -193,6 +197,10 @@ public interface RestApi {
     @GET("patient?lastviewed&v=full")
     Call<Results<Patient>> getLastViewedPatients(@Query("limit") Integer limit,
                                                  @Query("startIndex") Integer startIndex);
+
+    @Headers({"Content-Type: application/json"})
+    @GET("custom-location/all-locations")
+    Call<ResponseBody> getAllLocation(@Query("dateChanged") String timestamp);
 
     @Headers({"Content-Type: application/json"})
     @GET("stock/all-product")

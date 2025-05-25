@@ -176,33 +176,39 @@ class AddEditPatientViewModel @Inject constructor(
     }
 
     fun fetchMaritalStatusOptions() {
-        setLoading()
-        addSubscription(conceptRepository.getConceptOptions(ApplicationConstants.PATIENTS_MARITAL_STATUS_OPTIONS_UUID)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                _mStatusOptionList.value = it.answers
-            }
-        )
+
+        _mStatusOptionList.value = patientRepository.maritalStatusLocally
+//        setLoading()
+//        addSubscription(conceptRepository.getConceptOptions(ApplicationConstants.PATIENTS_MARITAL_STATUS_OPTIONS_UUID)
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe {
+//                _mStatusOptionList.value = it.answers
+//            }
+//        )
     }
 
     fun fetchBloodGroupOptions() {
-        setLoading()
-        addSubscription(conceptRepository.getConceptOptions(ApplicationConstants.PATIENTS_BLOOD_GROUP_OPTIONS_UUID)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                _bloodGroupOptionList.value = it.answers
-            }
-        )
+        _bloodGroupOptionList.value =  patientRepository.bloodGroupLocally
+
+//        setLoading()
+//        addSubscription(conceptRepository.getConceptOptions(ApplicationConstants.PATIENTS_BLOOD_GROUP_OPTIONS_UUID)
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe {
+//                _bloodGroupOptionList.value = it.answers
+//            }
+//        )
     }
 
     fun fetchReligionOptions() {
-        setLoading()
-        addSubscription(conceptRepository.getConceptOptions(ApplicationConstants.PATIENTS_RELIGION_OPTIONS_UUID)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                _religionOptionList.value = it.answers
-            }
-        )
+        _religionOptionList.value =  patientRepository.religionListLocally
+
+//        setLoading()
+//        addSubscription(patientRepository.religionListLocally.subscribe())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe {
+//                _religionOptionList.value = it.answers
+//            }
+//        )
     }
 
     fun fetchServerDivisions() {
@@ -312,6 +318,9 @@ class AddEditPatientViewModel @Inject constructor(
         return CustomPerson().apply {
             names = this@toCustomPerson.names
             gender = this@toCustomPerson.gender
+            matritalStatus = this@toCustomPerson.matritalStatus
+            bloodGroup = this@toCustomPerson.bloodGroup
+            relegion = this@toCustomPerson.relegion
             uuid = this@toCustomPerson.uuid
             birthdate = this@toCustomPerson.birthdate
             addresses = this@toCustomPerson.addresses

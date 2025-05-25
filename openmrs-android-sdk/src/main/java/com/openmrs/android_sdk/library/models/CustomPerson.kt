@@ -17,6 +17,18 @@ open class CustomPerson {
     @Expose
     var gender: String? = null
 
+    @SerializedName("matritalStatus")
+    @Expose
+    private val matritalStatus: String? = null
+
+    @SerializedName("relegion")
+    @Expose
+    private val relegion: String? = null
+
+    @SerializedName("bloodGroup")
+    @Expose
+    private val bloodGroup: String? = null
+
     @SerializedName("uuid")
     @Expose
     var uuid : String? = null
