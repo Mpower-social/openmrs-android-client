@@ -32,6 +32,7 @@ class StockDashboardActivity : ACBaseActivity(), View.OnClickListener {
             it.setTitle(R.string.drawer_stock_dashboard)
         }
         // Create fragment
+        // test
         var memberListFragment = supportFragmentManager.findFragmentById(R.id.referedMembersContentFrame) as StockDashboardFragment?
         if (memberListFragment == null) {
             memberListFragment = StockDashboardFragment.newInstance()
